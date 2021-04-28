@@ -5,7 +5,7 @@ public class Main {
 
   public static void main(String[] args){
     JFrame frame = new JFrame("Budget App"); //dffd
-    frame.setSize(400, 500);
+    frame.setSize(600, 800);
     frame.setVisible(true);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
