@@ -26,10 +26,12 @@ public class Expense {
     expenseAmount = newAmount;
     return newAmount;
   }
+
   public Date setExpenseDate(Date newAmount){
     expenseDate = newAmount;
     return expenseDate;
   }
+
   public String setExpenseType(String newAmount){
     expenseType = newAmount;
     return expenseType;
