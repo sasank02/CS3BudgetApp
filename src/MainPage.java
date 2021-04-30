@@ -29,8 +29,8 @@ public class MainPage {
           g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
           int w = getWidth();
           int h = getHeight();
-          Color color1 = Color.decode("#ffafbd");
-          Color color2 = Color.decode("#ffc3a0");
+          Color color1 = Color.decode("#02aab0");
+          Color color2 = Color.decode("#00cdac");
           GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
           g2d.setPaint(gp);
           g2d.fillRect(0, 0, w, h);
@@ -43,17 +43,23 @@ public class MainPage {
 
         JLabel titleLabel = new JLabel("Expense Tracker and Budget Manager");
         panel.add(titleLabel);
+         titleLabel.setForeground(Color.white);
+
         titleLabel.setBounds(100, 50, 400, 50);
         titleLabel.setFont(new Font("Times New Roman", Font.PLAIN, 25));
 
         JLabel incomeLabel = new JLabel("Income");
         panel.add(incomeLabel);
-        incomeLabel.setBounds(350, 110, 400, 50);
+      incomeLabel.setForeground(Color.white);
+
+      incomeLabel.setBounds(350, 110, 400, 50);
         incomeLabel.setFont(new Font("Helvetica", Font.BOLD, 19));
 
 
         JLabel salaryLabel = new JLabel("Salary: ", SwingConstants.CENTER);
         panel.add(salaryLabel);
+        salaryLabel.setForeground(Color.white);
+
         salaryLabel.setBounds(300, 155, 80, 30);
         salaryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 20));
 
@@ -64,6 +70,8 @@ public class MainPage {
 
         JLabel otherSalaryLabel = new JLabel("Others: ", SwingConstants.CENTER);
         panel.add(otherSalaryLabel);
+        otherSalaryLabel.setForeground(Color.white);
+
         otherSalaryLabel.setBounds(300, 205, 80, 30);
         otherSalaryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 20));
 
@@ -84,11 +92,6 @@ public class MainPage {
             }
         });
 
-        JLabel expensesDataLabel = new JLabel("Expense Types & Amounts");
-        panel.add(expensesDataLabel);
-        expensesDataLabel.setBounds(110, 320, 250, 30);
-        expensesDataLabel.setFont(new Font("Times New Roman", Font.BOLD, 18));
-
         daybydayButton = new JButton("Day by Day Breakdown");
         panel.add(daybydayButton);
         daybydayButton.setBounds(200, 570, 170, 30);
@@ -103,11 +106,14 @@ public class MainPage {
         //MARK: EXPENSES
         JLabel expenseLabel = new JLabel("Expenses");
         panel.add(expenseLabel);
-        expenseLabel.setBounds(110, 110, 400, 50);
+        expenseLabel.setForeground(Color.white);
+
+      expenseLabel.setBounds(110, 110, 400, 50);
         expenseLabel.setFont(new Font("Helvetica", Font.BOLD, 19));
 
         JButton addNewExpense = new JButton("Add Expense");
         panel.add(addNewExpense);
+
         addNewExpense.setBounds(60, 155, 190, 30);
         customizeButton(addNewExpense);
 
@@ -126,7 +132,7 @@ public class MainPage {
 
     public void customizeButton(JButton button) {
       button.setBorder(new RoundedBorder(30)); //10 is the radius
-      button.setBackground(Color.white);
+      button.setForeground(Color.white);
 
     }
 
