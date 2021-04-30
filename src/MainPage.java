@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,46 +46,35 @@ public class MainPage {
         titleLabel.setBounds(100, 50, 400, 50);
         titleLabel.setFont(new Font("Times New Roman", Font.PLAIN, 25));
 
-        expenseButton = new JButton("Add Expense");
-        panel.add(expenseButton);
-        expenseButton.setBounds(200, 120, 90, 30);
-        customizeButton(expenseButton);
-
-        expenseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
-        });
-
         JLabel incomeLabel = new JLabel("Income");
         panel.add(incomeLabel);
-        incomeLabel.setBounds(340, 170, 100, 40);
-        incomeLabel.setFont(new Font("Times New Roman", Font.PLAIN, 20));
+        incomeLabel.setBounds(350, 110, 400, 50);
+        incomeLabel.setFont(new Font("Helvetica", Font.BOLD, 19));
+
 
         JLabel salaryLabel = new JLabel("Salary: ", SwingConstants.CENTER);
         panel.add(salaryLabel);
-        salaryLabel.setBounds(300, 215, 80, 30);
+        salaryLabel.setBounds(300, 155, 80, 30);
         salaryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 20));
 
         JTextField monthlySalaryField = new JTextField();
         panel.add(monthlySalaryField);
-        monthlySalaryField.setBounds(370, 220, 100, 20);
+        monthlySalaryField.setBounds(370, 160, 100, 20);
         monthlySalaryField.setBorder(null);
 
         JLabel otherSalaryLabel = new JLabel("Others: ", SwingConstants.CENTER);
         panel.add(otherSalaryLabel);
-        otherSalaryLabel.setBounds(300, 245, 80, 30);
+        otherSalaryLabel.setBounds(300, 205, 80, 30);
         otherSalaryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 20));
 
         JTextField otherSalaryField = new JTextField();
         panel.add(otherSalaryField);
-        otherSalaryField.setBounds(370, 250, 100, 20);
+        otherSalaryField.setBounds(370, 210, 100, 20);
         otherSalaryField.setBorder(null);
 
         incomeButton = new JButton("Add Income");
         panel.add(incomeButton);
-        incomeButton.setBounds(330, 280, 90, 30);
+        incomeButton.setBounds(300, 255, 190, 30);
         customizeButton(incomeButton);
 
         incomeButton.addActionListener(new ActionListener() {
@@ -93,11 +83,6 @@ public class MainPage {
 
             }
         });
-
-        settingsButton = new JButton("Settings");
-        panel.add(settingsButton);
-        settingsButton.setBounds(160, 260, 130, 30);
-        customizeButton(settingsButton);
 
         JLabel expensesDataLabel = new JLabel("Expense Types & Amounts");
         panel.add(expensesDataLabel);
@@ -113,11 +98,65 @@ public class MainPage {
         panel.add(cumulativeExpenseButton);
         cumulativeExpenseButton.setBounds(190, 610, 190, 30);
         customizeButton(cumulativeExpenseButton);
+
+
+        //MARK: EXPENSES
+        JLabel expenseLabel = new JLabel("Expenses");
+        panel.add(expenseLabel);
+        expenseLabel.setBounds(110, 110, 400, 50);
+        expenseLabel.setFont(new Font("Helvetica", Font.BOLD, 19));
+
+        JButton addNewExpense = new JButton("Add Expense");
+        panel.add(addNewExpense);
+        addNewExpense.setBounds(60, 155, 190, 30);
+        customizeButton(addNewExpense);
+
+
+        JButton viewSetExpensesButton = new JButton("Fixed Expenses");
+        panel.add(viewSetExpensesButton);
+        viewSetExpensesButton.setBounds(60, 205, 190, 30);
+        customizeButton(viewSetExpensesButton);
+
+        JButton editRemoveExpenses = new JButton("Edit/Remove");
+        panel.add(editRemoveExpenses);
+        editRemoveExpenses.setBounds(60, 255, 190, 30);
+        customizeButton(editRemoveExpenses);
+
     }
 
     public void customizeButton(JButton button) {
-        button.setBorder(null);
-        button.setBackground(Color.black);
-        button.setForeground(Color.white);
+      button.setBorder(new RoundedBorder(30)); //10 is the radius
+      button.setBackground(Color.white);
+
     }
+
+  private static class RoundedBorder implements Border {
+
+    private int radius;
+
+
+    RoundedBorder(int radius) {
+      this.radius = radius;
+    }
+
+
+    public Insets getBorderInsets(Component c) {
+      return new Insets(this.radius+1, this.radius+1, this.radius+2, this.radius);
+    }
+
+
+    public boolean isBorderOpaque() {
+      return true;
+    }
+
+
+    public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+      g.drawRoundRect(x, y, width-1, height-1, radius, radius);
+    }
+  }
 }
+
+
+
+
+
