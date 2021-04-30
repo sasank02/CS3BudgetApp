@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class MainPage {
 
@@ -24,10 +26,24 @@ public class MainPage {
         expenseButton.setBounds(200, 120, 90, 30);
         customizeButton(expenseButton);
 
+        expenseButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+
         JButton incomeButton = new JButton("Add Income");
         panel.add(incomeButton);
         incomeButton.setBounds(300, 120, 90, 30);
         customizeButton(incomeButton);
+
+        incomeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
 
         JButton createExpenseButton = new JButton("Create Expense Type");
         panel.add(createExpenseButton);
