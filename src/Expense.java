@@ -10,7 +10,7 @@ public class Expense {
     expenseType = type;
     //new comment for commit
   }
-
+  //commit
   //GET METHODS
   public int getExpenseAmount(){
     return expenseAmount;

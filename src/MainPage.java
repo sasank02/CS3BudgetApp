@@ -110,7 +110,7 @@ public class MainPage {
 
       expenseLabel.setBounds(110, 110, 400, 50);
         expenseLabel.setFont(new Font("Helvetica", Font.BOLD, 19));
-
+  //ignore
         JButton addNewExpense = new JButton("Add Expense");
         panel.add(addNewExpense);
 

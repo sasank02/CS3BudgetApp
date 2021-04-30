@@ -91,7 +91,7 @@ public class HomePage {
     withdrawLabel.setForeground(Color.white);
     withdrawLabel.setBounds(380, 315, 400, 50);
     withdrawLabel.setFont(new Font("Heveltica", Font.BOLD, 18));
-
+  //commit
     JLabel withdrawAmountLabel = new JLabel("Amount: ", SwingConstants.CENTER);
     withdrawAmountLabel.setForeground(Color.white);
     withdrawAmountLabel.setBounds(297, 370, 80, 30);
