@@ -8,8 +8,6 @@ public class MainPage {
   JPanel panel;
   JButton expenseButton;
   JButton incomeButton;
-  JButton createExpenseButton;
-  JButton manageExpenseButton;
   JButton settingsButton;
   JButton daybydayButton;
   JButton cumulativeExpenseButton;
@@ -50,7 +48,7 @@ public class MainPage {
         expenseButton.setBounds(200, 120, 90, 30);
         customizeButton(expenseButton);
 
-        expenseButton.addActionListener(new ActionListener() {
+        expenseButton.addActionListener(new ActionListener() {  //when clicked, the user can add an expense
             @Override
             public void actionPerformed(ActionEvent e) {
 
@@ -72,6 +70,13 @@ public class MainPage {
         monthlySalaryField.setBounds(370, 220, 100, 20);
         monthlySalaryField.setBorder(null);
 
+        monthlySalaryField.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+
+          }
+        });
+
         JLabel otherSalaryLabel = new JLabel("Others: ", SwingConstants.CENTER);
         panel.add(otherSalaryLabel);
         otherSalaryLabel.setBounds(300, 245, 80, 30);
@@ -81,6 +86,13 @@ public class MainPage {
         panel.add(otherSalaryField);
         otherSalaryField.setBounds(370, 250, 100, 20);
         otherSalaryField.setBorder(null);
+
+        otherSalaryField.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+
+          }
+        });
 
         incomeButton = new JButton("Add Income");
         panel.add(incomeButton);
