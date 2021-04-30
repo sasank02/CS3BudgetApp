@@ -9,10 +9,25 @@ public class MainPage {
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JPanel panel = new JPanel();
+      JPanel panel = new JPanel() {
+        @Override
+        protected void paintComponent(Graphics g) {
+          super.paintComponent(g);
+          Graphics2D g2d = (Graphics2D) g;
+          g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+          int w = getWidth();
+          int h = getHeight();
+          Color color1 = Color.decode("#ffafbd");
+          Color color2 = Color.decode("#ffc3a0");
+          GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
+          g2d.setPaint(gp);
+          g2d.fillRect(0, 0, w, h);
+        }
+
+      };
         panel.setLayout(null);
         frame.add(panel);
-        panel.setBackground(Color.white);
+        panel.setBackground(Color.blue);
 
         JLabel titleLabel = new JLabel("Expense Tracker and Budget Manager");
         panel.add(titleLabel);
