@@ -1,4 +1,3 @@
-import com.sun.tools.javadoc.DocImpl;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -6,8 +5,6 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.Component;
-import java.awt.Graphics;
 import java.util.TreeMap;
 
 public class HomePage {
@@ -36,13 +33,26 @@ public class HomePage {
         incomeAmountField.setEditable(false);
         otherSalaryField.setEditable(false);
 
-        String amountString = (String) incomeAmountField.getText();
-        String otherSalaryString = (String) otherSalaryField.getText();
+        //String amountString = (String) incomeAmountField.getText();
+        // otherSalaryString = (String) otherSalaryField.getText();
 
-        Double totalAmount = Double.parseDouble(amountString) + Double.parseDouble(otherSalaryString);
+        //Double totalAmount = Double.parseDouble(amountString) + Double.parseDouble(otherSalaryString);
 
         //ADD MONEY TO CATEGORY SPREAD EVENLY
+        //Category(String cTitle, Double cWeight, Double cExistingAmount, Double cNeededAmount, int cSpecialImportance, boolean cMandatoryFill
+        JTextField title = new JTextField();
+        JTextField cWeight = new JTextField();
+        JTextField existingAmount = new JTextField();
+        JTextField neededAmount = new JTextField();
+        JTextField specialImportance = new JTextField();
+        JTextField mandatoryFill = new JTextField();
 
+        Object[] fields = {"Title:", title, "cWeight:", cWeight, "Existing Amount:", existingAmount, "Needed Amount:", neededAmount, "Special Importance:", specialImportance, "Mandatory Fill:", mandatoryFill};
+        int input = JOptionPane.showConfirmDialog(null, fields, "New Income", JOptionPane.OK_CANCEL_OPTION);
+
+        if(input == 0) {
+
+        }
       }
     });
 
@@ -56,19 +66,22 @@ public class HomePage {
         String amountString = (String) withdrawAmountField.getText();
         String sourceString = (String) withdrawSourceField.getText();
 
-        Double totalAmount = Double.parseDouble(amountString);
+        Integer totalAmount = Integer.parseInt(amountString);
+        Double doubleTotalAmount = Double.parseDouble(amountString);
 
         //Remove MONEY From CATEGORY SPREAD EVENLY
         Category category = findCategory(sourceString);
-        category.deltaExistingAmount((totalAmount*-1));
+        category.deltaExistingAmount((doubleTotalAmount * -1));
 
+        if(categoriesMap.containsKey(sourceString)) {
+          categoriesMap.remove(sourceString, (Integer) totalAmount);
+        }
       }
     });
 
   }
 
   public Category findCategory(String src){
-
     return null;
   }
 
@@ -238,6 +251,8 @@ public class HomePage {
     panel.add(addIncomeLabel);
     panel.add(withdrawLabel);
     frame.setVisible(true);
+
+    setListeners();
 
   }
   public void customizeButton(JButton button) {
