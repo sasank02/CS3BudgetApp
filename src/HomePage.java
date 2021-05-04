@@ -220,6 +220,7 @@ public class HomePage {
       }
     });
 //comment
+    //comment
 
     panel.add(withdrawAmountLabel);
     panel.add(withdrawAmountField);

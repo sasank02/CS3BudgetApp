@@ -7,6 +7,7 @@ public class Category {
   int specialImportance;
   boolean mandatoryFill;
   //comment
+  //comment
   public Category(String cTitle, Double cWeight, Double cExistingAmount, Double cNeededAmount, int cSpecialImportance, boolean cMandatoryFill  ) {
     title = cTitle;
     weight = cWeight;

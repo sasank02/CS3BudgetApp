@@ -11,6 +11,7 @@ public class Expense {
     //new comment for commit
   }
   //commit
+  //comment
   //GET METHODS
   public int getExpenseAmount(){
     return expenseAmount;

@@ -112,6 +112,7 @@ public class MainPage {
         expenseLabel.setFont(new Font("Helvetica", Font.BOLD, 19));
 
         JButton addNewExpense = new JButton("Add Expense");
+      //comment
         panel.add(addNewExpense);
 
         addNewExpense.setBounds(60, 155, 190, 30);
