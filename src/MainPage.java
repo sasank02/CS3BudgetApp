@@ -117,7 +117,7 @@ public class MainPage {
         addNewExpense.setBounds(60, 155, 190, 30);
         customizeButton(addNewExpense);
 
-
+//comment
         JButton viewSetExpensesButton = new JButton("Fixed Expenses");
         panel.add(viewSetExpensesButton);
         viewSetExpensesButton.setBounds(60, 205, 190, 30);

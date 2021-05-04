@@ -8,3 +8,4 @@ public class CategoriesMainRunner {
       new HomePage();
   }
 }
+//comment
