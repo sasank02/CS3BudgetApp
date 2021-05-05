@@ -5,6 +5,7 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.*;
 import java.util.TreeMap;
 
 public class HomePage {
@@ -12,32 +13,66 @@ public class HomePage {
   JPanel panel;
   JButton addIncomeButton;
   JButton withdrawButton;
-
+  JButton addCategoryButton;
   JTextField incomeAmountField;
   JTextField otherSalaryField;
   JTextField withdrawAmountField;
   JTextField withdrawSourceField;
+  JButton askEditButton;
+  JList categoriesList;
+  MyListModel categoryListModel;
 
-  TreeMap<Category, Integer> categoriesMap = new TreeMap<Category, Integer>();
+  ArrayList<Category> categoriesMap = new ArrayList<Category>();
 
   public HomePage() {
     setGraphics();
 
+    categoryListModel = new MyListModel();
+    categoriesList=new JList(categoryListModel);
+    categoriesList.setBounds(30, 200, 240, 400);
+    categoriesList.setFixedCellHeight(50);
+    categoriesList.setFont(new Font("Heveltica",Font.BOLD,14));
+
+    panel.add(categoriesList);
   }
 
+
   public void setListeners(){
+    addCategoryButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        JTextField categoryName = new JTextField();
+        JTextField categoryRank = new JTextField();
+        JTextField categoryExistingAmount = new JTextField();
+        JTextField categoryAmountNeeded = new JTextField();
+        JTextField categoryMandatory = new JTextField();
+
+
+        Object[] fields = {"Category Name:", categoryName , "Category Rank:", categoryRank, "Existing Amount:" , categoryExistingAmount, "Amount Needed:", categoryAmountNeeded , "Mandatory Category?", categoryMandatory};
+        int input = JOptionPane.showConfirmDialog(null, fields, "New Category", JOptionPane.OK_CANCEL_OPTION);
+
+        boolean mandatoryToFill = false;
+        if(categoryMandatory.getText().toLowerCase().equals("yes")) mandatoryToFill = true;
+        Category newCategory =  new Category(categoryName.getText(), Integer.parseInt(categoryRank.getText()), Double.parseDouble(categoryExistingAmount.getText()), Double.parseDouble(categoryAmountNeeded.getText()), mandatoryToFill);
+        //TODO: VALIDATE FIELDS
+
+        String toPlace = "" + ((Integer) newCategory.weight) + ") " + newCategory.title.toUpperCase() + "  $" +  newCategory.existingAmount +"/$" +  newCategory.neededAmount;
+        categoryListModel.addElement(toPlace);
+
+        System.out.print("INPUT: \n" + newCategory.title + "\n" + newCategory.weight + "\n" + newCategory.existingAmount + "\n" + newCategory.filledPercent + "\n" + newCategory.neededAmount + "\n" + newCategory.mandatoryFill);
+        //categoriesList.updateUI();
+      }
+    });
+
     addIncomeButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         //SECURE DATA FROM TEXT FIELDS
         incomeAmountField.setEditable(false);
         otherSalaryField.setEditable(false);
-
         //String amountString = (String) incomeAmountField.getText();
         // otherSalaryString = (String) otherSalaryField.getText();
-
         //Double totalAmount = Double.parseDouble(amountString) + Double.parseDouble(otherSalaryString);
-
         //ADD MONEY TO CATEGORY SPREAD EVENLY
         //Category(String cTitle, Double cWeight, Double cExistingAmount, Double cNeededAmount, int cSpecialImportance, boolean cMandatoryFill
         JTextField title = new JTextField();
@@ -47,7 +82,7 @@ public class HomePage {
         JTextField specialImportance = new JTextField();
         JTextField mandatoryFill = new JTextField();
 
-        Object[] fields = {"Title:", title, "cWeight:", cWeight, "Existing Amount:", existingAmount, "Needed Amount:", neededAmount, "Special Importance:", specialImportance, "Mandatory Fill:", mandatoryFill};
+        Object[] fields = {"Title:", title, "Weight Factor:", cWeight, "Existing Amount:", existingAmount, "Needed Amount:", neededAmount, "Special Importance:", specialImportance, "Mandatory Fill:", mandatoryFill};
         int input = JOptionPane.showConfirmDialog(null, fields, "New Income", JOptionPane.OK_CANCEL_OPTION);
 
         if(input == 0) {
@@ -73,9 +108,25 @@ public class HomePage {
         Category category = findCategory(sourceString);
         category.deltaExistingAmount((doubleTotalAmount * -1));
 
-        if(categoriesMap.containsKey(sourceString)) {
-          categoriesMap.remove(sourceString, (Integer) totalAmount);
+//        if(categoriesMap.containsKey(sourceString)) {
+//          categoriesMap.remove(sourceString, (Integer) totalAmount);
+//        }
+      }
+    });
+
+    askEditButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        //SECURE DATA FROM TEXT FIELDS
+        if(incomeAmountField.isEditable()){
+          incomeAmountField.setEditable(false);
+          otherSalaryField.setEditable(false);
         }
+        else{
+          incomeAmountField.setEditable(true);
+          otherSalaryField.setEditable(true);
+        }
+
       }
     });
 
@@ -154,28 +205,11 @@ public class HomePage {
     addIncomeButton.setBounds(350, 290, 150, 30);
     customizeButton(addIncomeButton);
 
-    JButton askEditButton = new JButton("Edit");
+    askEditButton = new JButton("Edit");
     askEditButton.setBounds(370, 150, 115, 22);
     askEditButton.setBorder(new RoundedBorder(22)); //10 is the radius
     askEditButton.setForeground(Color.white);
     panel.add(askEditButton);
-
-    askEditButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        //SECURE DATA FROM TEXT FIELDS
-        if(incomeAmountField.isEditable()){
-          incomeAmountField.setEditable(false);
-          otherSalaryField.setEditable(false);
-        }
-        else{
-          incomeAmountField.setEditable(true);
-          otherSalaryField.setEditable(true);
-        }
-
-      }
-    });
-
 
     //WITHDRAW
     JLabel withdrawLabel = new JLabel("Withdraw");
@@ -232,6 +266,13 @@ public class HomePage {
 
       }
     });
+
+
+    addCategoryButton = new JButton("Add Category");
+    addCategoryButton.setBounds(40, 150, 150, 30);
+    addCategoryButton.setBorder(new RoundedBorder(30)); //10 is the radius
+    addCategoryButton.setForeground(Color.white);
+    panel.add(addCategoryButton);
 //comment
     //comment
 
@@ -255,13 +296,14 @@ public class HomePage {
     setListeners();
 
   }
+
   public void customizeButton(JButton button) {
     button.setBorder(new RoundedBorder(30)); //10 is the radius
     button.setForeground(Color.white);
   }
   private static class RoundedBorder implements Border {
     private int radius;
-     RoundedBorder(int radius) {
+    RoundedBorder(int radius) {
       this.radius = radius;
     }
     public Insets getBorderInsets(Component c) {
@@ -278,5 +320,19 @@ public class HomePage {
 }
 
 
+class MyListModel extends AbstractListModel {
 
+  private final ArrayList<String> myArrayList = new ArrayList<String>();
+
+  public void addElement(String obj) {
+    myArrayList.add(obj);
+    fireIntervalAdded(this, myArrayList.size()-1, myArrayList.size()-1);
+  }
+
+  @Override
+  public Object getElementAt(int index) { return myArrayList.get(index); }
+
+  @Override
+  public int getSize() { return myArrayList.size(); }
+}
 
