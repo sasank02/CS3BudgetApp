@@ -1,4 +1,3 @@
-import com.sun.tools.javadoc.DocImpl;
 
 import javax.swing.*;
 import javax.swing.border.Border;
