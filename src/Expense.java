@@ -8,10 +8,7 @@ public class Expense {
     expenseAmount = amount;
     expenseDate = date;
     expenseType = type;
-    //new comment for commit
   }
-  //commit
-  //comment
   //GET METHODS
   public int getExpenseAmount(){
     return expenseAmount;

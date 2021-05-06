@@ -1,6 +1,6 @@
-public class Category {
+public class Category implements Comparable<Category> {
   String title;
-  Double weight;
+  Integer weight;
   Double existingAmount;
   Double neededAmount;
   Double filledPercent;
@@ -8,14 +8,16 @@ public class Category {
   boolean mandatoryFill;
   //comment
   //comment
-  public Category(String cTitle, Double cWeight, Double cExistingAmount, Double cNeededAmount, int cSpecialImportance, boolean cMandatoryFill  ) {
+  public Category(String cTitle, Integer cWeight, Double cExistingAmount, Double cNeededAmount, boolean cMandatoryFill  ) {
     title = cTitle;
     weight = cWeight;
     existingAmount = cExistingAmount;
     neededAmount = cNeededAmount;
-    specialImportance = cSpecialImportance;
     mandatoryFill = cMandatoryFill;
-    filledPercent = (Double) existingAmount/neededAmount;
+    filledPercent = (Double) 100.0 * existingAmount/neededAmount;
+  }
+
+  public Category() {
   }
 
   public void updateFilledPercent(){
@@ -24,7 +26,7 @@ public class Category {
   public void changeTitle(String newValue){
     title = newValue;
   }
-  public void changeWeight(Double newValue){
+  public void changeWeight(int newValue){
     weight = newValue;
   }
   public void deltaExistingAmount(Double newValue){
@@ -42,4 +44,8 @@ public class Category {
     mandatoryFill = newValue;
   }
 
+  @Override
+  public int compareTo(Category o) {
+    return this.weight.compareTo(o.weight);
+  }
 }
