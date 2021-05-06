@@ -6,6 +6,7 @@ public class Category implements Comparable<Category> {
   Double filledPercent;
   int specialImportance;
   boolean mandatoryFill;
+
   //comment
   //comment
   public Category(String cTitle, Integer cWeight, Double cExistingAmount, Double cNeededAmount, boolean cMandatoryFill  ) {

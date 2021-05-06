@@ -23,7 +23,7 @@ public class HomePage {
   MyListModel categoryListModel;
   Category leftover;
   TreeMap<Integer, Category> categoriesMap = new TreeMap<Integer, Category>();
-
+  //recommit
   public HomePage() {
     setGraphics();
 
@@ -229,9 +229,6 @@ public class HomePage {
     }
     categoriesList.updateUI();
   }
-
-
-
 
 
   public Category findCategory(String src){
