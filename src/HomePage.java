@@ -21,8 +21,8 @@ public class HomePage {
   JButton askEditButton;
   JList categoriesList;
   MyListModel categoryListModel;
-
-  ArrayList<Category> categoriesMap = new ArrayList<Category>();
+  Category leftover;
+  TreeMap<Integer, Category> categoriesMap = new TreeMap<Integer, Category>();
 
   public HomePage() {
     setGraphics();
@@ -32,6 +32,13 @@ public class HomePage {
     categoriesList.setBounds(30, 200, 240, 400);
     categoriesList.setFixedCellHeight(50);
     categoriesList.setFont(new Font("Heveltica",Font.BOLD,14));
+
+    leftover = new Category("Leftover", 10000, 0.0, Double.MAX_VALUE, false);
+
+    categoriesMap.put(1000, leftover);
+
+    String toPlace = "" + (leftover.title.toUpperCase() + "  $" +  leftover.existingAmount);
+    categoryListModel.addElement(toPlace);
 
     panel.add(categoriesList);
   }
@@ -58,8 +65,9 @@ public class HomePage {
 
         String toPlace = "" + ((Integer) newCategory.weight) + ") " + newCategory.title.toUpperCase() + "  $" +  newCategory.existingAmount +"/$" +  newCategory.neededAmount;
         categoryListModel.addElement(toPlace);
+        categoriesMap.put(Integer.parseInt(categoryRank.getText()), newCategory);
 
-        System.out.print("INPUT: \n" + newCategory.title + "\n" + newCategory.weight + "\n" + newCategory.existingAmount + "\n" + newCategory.filledPercent + "\n" + newCategory.neededAmount + "\n" + newCategory.mandatoryFill);
+//        System.out.print("INPUT: \n" + newCategory.title + "\n" + newCategory.weight + "\n" + newCategory.existingAmount + "\n" + newCategory.filledPercent + "\n" + newCategory.neededAmount + "\n" + newCategory.mandatoryFill);
         //categoriesList.updateUI();
       }
     });
@@ -70,23 +78,20 @@ public class HomePage {
         //SECURE DATA FROM TEXT FIELDS
         incomeAmountField.setEditable(false);
         otherSalaryField.setEditable(false);
-        //String amountString = (String) incomeAmountField.getText();
-        // otherSalaryString = (String) otherSalaryField.getText();
-        //Double totalAmount = Double.parseDouble(amountString) + Double.parseDouble(otherSalaryString);
-        //ADD MONEY TO CATEGORY SPREAD EVENLY
-        //Category(String cTitle, Double cWeight, Double cExistingAmount, Double cNeededAmount, int cSpecialImportance, boolean cMandatoryFill
-        JTextField title = new JTextField();
-        JTextField cWeight = new JTextField();
-        JTextField existingAmount = new JTextField();
-        JTextField neededAmount = new JTextField();
-        JTextField specialImportance = new JTextField();
-        JTextField mandatoryFill = new JTextField();
 
-        Object[] fields = {"Title:", title, "Weight Factor:", cWeight, "Existing Amount:", existingAmount, "Needed Amount:", neededAmount, "Special Importance:", specialImportance, "Mandatory Fill:", mandatoryFill};
-        int input = JOptionPane.showConfirmDialog(null, fields, "New Income", JOptionPane.OK_CANCEL_OPTION);
+        String amountString = (String) incomeAmountField.getText();
+        String otherSalaryString = (String) otherSalaryField.getText();
+        Double totalAmount = Double.parseDouble(amountString) + Double.parseDouble(otherSalaryString);
 
-        if(input == 0) {
-
+        int dialogButton = JOptionPane.YES_NO_OPTION;
+        int dialogResult = JOptionPane.showConfirmDialog(null, "Are you sure you want to add $" + totalAmount + " as income?", "Confirm", dialogButton);
+        if(dialogResult == 0) {
+          //YES
+          //spread evenly\
+          spreadEvenly(totalAmount);
+        } else {
+          //NO
+          //do nothing
         }
       }
     });
@@ -94,23 +99,44 @@ public class HomePage {
     withdrawButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        //SECURE DATA FROM TEXT FIELDS
+//        //SECURE DATA FROM TEXT FIELDS
+//        withdrawAmountField.setEditable(false);
+//        withdrawSourceField.setEditable(false);
+//
+//        String amountString = (String) withdrawAmountField.getText();
+//        String sourceString = (String) withdrawSourceField.getText();
+//
+//        Integer totalAmount = Integer.parseInt(amountString);
+//        Double doubleTotalAmount = Double.parseDouble(amountString);
+//
+//        //Remove MONEY From CATEGORY SPREAD EVENLY
+//        Category category = findCategory(sourceString);
+//        category.deltaExistingAmount((doubleTotalAmount * -1));
+//
+////        if(categoriesMap.containsKey(sourceString)) {
+////          categoriesMap.remove(sourceString, (Integer) totalAmount);
+////        }
+
         withdrawAmountField.setEditable(false);
         withdrawSourceField.setEditable(false);
 
-        String amountString = (String) withdrawAmountField.getText();
-        String sourceString = (String) withdrawSourceField.getText();
+        Double amountString = Double.parseDouble(withdrawAmountField.getText());
+        String source = (String) withdrawSourceField.getText();
 
-        Integer totalAmount = Integer.parseInt(amountString);
-        Double doubleTotalAmount = Double.parseDouble(amountString);
+        if(source.toLowerCase().equals("none")){
+          int dialogButton = JOptionPane.YES_NO_OPTION;
+          int dialogResult = JOptionPane.showConfirmDialog(null, "Are you sure you want to withdraw $" + amountString + " from '" + source + "'?", "Confirm", dialogButton);
+          if(dialogResult == 0) {
+            //YES
+            //spread evenly\
+            removeEvenly(amountString);
+          } else {
+            //NO
+            //do nothing
+          }
+        }
 
-        //Remove MONEY From CATEGORY SPREAD EVENLY
-        Category category = findCategory(sourceString);
-        category.deltaExistingAmount((doubleTotalAmount * -1));
 
-//        if(categoriesMap.containsKey(sourceString)) {
-//          categoriesMap.remove(sourceString, (Integer) totalAmount);
-//        }
       }
     });
 
@@ -131,6 +157,82 @@ public class HomePage {
     });
 
   }
+
+  public void spreadEvenly(Double amount){
+      System.out.print("\nbefore\n");
+    for(Map.Entry<Integer, Category> category : categoriesMap.entrySet()){
+      System.out.println("--> " + category.getValue().existingAmount + " //// needed: " + (category.getValue().neededAmount));
+    }
+      //get all categories list
+      for(Map.Entry<Integer, Category> category : categoriesMap.entrySet()){
+
+        Double needed = category.getValue().neededAmount - category.getValue().existingAmount;
+        if(needed != 0 && amount != 0) {
+          if (needed < amount) {
+            System.out.println("adding " + amount);
+            category.getValue().existingAmount += needed;
+            amount -= needed;
+
+          } else if (needed >= amount) {
+            category.getValue().existingAmount += amount;
+            amount = 0.0;
+          }
+        }
+
+      }
+
+      leftover.existingAmount += amount;
+      System.out.print("\n\nLeftover: " + leftover.existingAmount);
+      System.out.print("\n\nafter\n\n");
+      for(Map.Entry<Integer, Category> category : categoriesMap.entrySet()){
+        System.out.println("--> " + category.getValue().existingAmount + " //// needed: " + (category.getValue().neededAmount));
+      }
+      categoriesList.updateUI();
+  }
+
+
+
+
+  public void removeEvenly(Double amount){
+    System.out.print("\nbefore\n");
+    for(Map.Entry<Integer, Category> category : categoriesMap.entrySet()){
+      System.out.println("--> " + category.getValue().existingAmount + " //// needed: " + (category.getValue().neededAmount));
+    }
+
+    for(int i = categoriesMap.size()-1; i >0; i--){
+      System.out.println("LOOKING FOR: " + i);
+      Category category = categoriesMap.get(i);
+      Double value = category.existingAmount;
+      if(amount != 0 && value !=0) {
+        if (amount < value) {
+          System.out.println("removing " + amount);
+          category.existingAmount -= amount;
+          amount = 0.0 ;
+
+        } else if (amount >= value) {
+
+          category.existingAmount  = 0.0;
+          amount = amount - value;
+        }
+      }
+      if(value < 0){
+        JOptionPane.showMessageDialog(null, "Cannot withdraw. Insufficient funds");
+      }
+
+    }
+
+    leftover.existingAmount -= amount;
+
+    System.out.print("\n\nafter\n\n");
+    for(Map.Entry<Integer, Category> category : categoriesMap.entrySet()){
+      System.out.println("--> " + category.getValue().existingAmount + " //// needed: " + (category.getValue().neededAmount));
+    }
+    categoriesList.updateUI();
+  }
+
+
+
+
 
   public Category findCategory(String src){
     return null;
@@ -301,6 +403,7 @@ public class HomePage {
     button.setBorder(new RoundedBorder(30)); //10 is the radius
     button.setForeground(Color.white);
   }
+
   private static class RoundedBorder implements Border {
     private int radius;
     RoundedBorder(int radius) {
