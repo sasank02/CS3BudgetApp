@@ -180,6 +180,7 @@ public class HomePage {
     JFrame frame = new JFrame("Budget");
     frame.setSize(600, 700);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setLocationRelativeTo(null);
 
     panel = new JPanel() {
       @Override
