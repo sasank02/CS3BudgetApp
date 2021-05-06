@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
-import java.util.TreeMap;
 
 public class HomePage {
 
@@ -22,7 +21,11 @@ public class HomePage {
   JList categoriesList;
   MyListModel categoryListModel;
 
-  ArrayList<Category> categoriesMap = new ArrayList<Category>();
+  ArrayList<Category> categories = new ArrayList<Category>();
+  Stack<Category> categoryStack = new Stack<Category>();
+
+  Double totalAmountLeft = 0.0;
+  JLabel totalAmountLeftLabel = new JLabel("Amount Left: $" + totalAmountLeft);
 
   public HomePage() {
     setGraphics();
@@ -34,6 +37,11 @@ public class HomePage {
     categoriesList.setFont(new Font("Heveltica",Font.BOLD,14));
 
     panel.add(categoriesList);
+
+    panel.add(totalAmountLeftLabel);
+    totalAmountLeftLabel.setFont(new Font("Times New Roman", Font.BOLD, 18));
+    totalAmountLeftLabel.setBounds(30, categoriesList.getY() + categoriesList.getHeight() + 10, 200, 40);
+
   }
 
 
@@ -45,22 +53,21 @@ public class HomePage {
         JTextField categoryRank = new JTextField();
         JTextField categoryExistingAmount = new JTextField();
         JTextField categoryAmountNeeded = new JTextField();
-        JTextField categoryMandatory = new JTextField();
 
 
-        Object[] fields = {"Category Name:", categoryName , "Category Rank:", categoryRank, "Existing Amount:" , categoryExistingAmount, "Amount Needed:", categoryAmountNeeded , "Mandatory Category?", categoryMandatory};
+        Object[] fields = {"Category Name:", categoryName , "Category Rank:", categoryRank, "Existing Amount:" , categoryExistingAmount, "Amount Needed:", categoryAmountNeeded};
         int input = JOptionPane.showConfirmDialog(null, fields, "New Category", JOptionPane.OK_CANCEL_OPTION);
 
-        boolean mandatoryToFill = false;
-        if(categoryMandatory.getText().toLowerCase().equals("yes")) mandatoryToFill = true;
-        Category newCategory =  new Category(categoryName.getText(), Integer.parseInt(categoryRank.getText()), Double.parseDouble(categoryExistingAmount.getText()), Double.parseDouble(categoryAmountNeeded.getText()), mandatoryToFill);
-        //TODO: VALIDATE FIELDS
+        if(input == 0) {
+          Category newCategory = new Category(categoryName.getText(), Integer.parseInt(categoryRank.getText()), Double.parseDouble(categoryExistingAmount.getText()), Double.parseDouble(categoryAmountNeeded.getText()));
+          //TODO: VALIDATE FIELDS
 
-        String toPlace = "" + ((Integer) newCategory.weight) + ") " + newCategory.title.toUpperCase() + "  $" +  newCategory.existingAmount +"/$" +  newCategory.neededAmount;
-        categoryListModel.addElement(toPlace);
+          String toPlace = "" + ((Integer) newCategory.weight) + ") " + newCategory.title.toUpperCase() + "  $" + newCategory.existingAmount + "/$" + newCategory.neededAmount;
+          categoryListModel.addElement(toPlace);
 
-        System.out.print("INPUT: \n" + newCategory.title + "\n" + newCategory.weight + "\n" + newCategory.existingAmount + "\n" + newCategory.filledPercent + "\n" + newCategory.neededAmount + "\n" + newCategory.mandatoryFill);
-        //categoriesList.updateUI();
+          categories.add(newCategory.weight - 1, newCategory);
+          System.out.println("INPUT: " + "Category: " + newCategory.title + ",  " + "Rank: " + newCategory.weight + ",  " + "Filled Percent: " + newCategory.existingAmount + "/" + newCategory.neededAmount);
+        }
       }
     });
 
@@ -70,23 +77,41 @@ public class HomePage {
         //SECURE DATA FROM TEXT FIELDS
         incomeAmountField.setEditable(false);
         otherSalaryField.setEditable(false);
-        //String amountString = (String) incomeAmountField.getText();
-        // otherSalaryString = (String) otherSalaryField.getText();
-        //Double totalAmount = Double.parseDouble(amountString) + Double.parseDouble(otherSalaryString);
+
+        String amountString = (String) incomeAmountField.getText();
+        String otherSalaryString = (String) otherSalaryField.getText();
+
+        Double totalAmount = Double.parseDouble(amountString) + Double.parseDouble(otherSalaryString) + totalAmountLeft;
+        totalAmountLeft = 0.0;
+
         //ADD MONEY TO CATEGORY SPREAD EVENLY
-        //Category(String cTitle, Double cWeight, Double cExistingAmount, Double cNeededAmount, int cSpecialImportance, boolean cMandatoryFill
-        JTextField title = new JTextField();
-        JTextField cWeight = new JTextField();
-        JTextField existingAmount = new JTextField();
-        JTextField neededAmount = new JTextField();
-        JTextField specialImportance = new JTextField();
-        JTextField mandatoryFill = new JTextField();
 
-        Object[] fields = {"Title:", title, "Weight Factor:", cWeight, "Existing Amount:", existingAmount, "Needed Amount:", neededAmount, "Special Importance:", specialImportance, "Mandatory Fill:", mandatoryFill};
-        int input = JOptionPane.showConfirmDialog(null, fields, "New Income", JOptionPane.OK_CANCEL_OPTION);
+        int i = 0;
+        while(i < categories.size()) {
+          if(totalAmount > 0.0) {
+            Category category = categories.get(i);
+            Double amountLeftToPay = category.neededAmount - category.existingAmount;
+            category.existingAmount += totalAmount;
+            if(totalAmount < amountLeftToPay) {
+              totalAmount = 0.0;
+            } else if(totalAmount >= amountLeftToPay) {
+              totalAmount -= amountLeftToPay;
+              categoryStack.push(category); //adds the category to the stack
+              categories.remove(i);
+            }
+          } else {
+            break;
+          }
+        }
 
-        if(input == 0) {
+        totalAmountLeft += totalAmount;
+        totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
 
+        System.out.println();
+
+        for(int k = 0; k < categories.size(); k++) {
+          Category newCategory = categories.get(k);
+          System.out.println("INPUT: " + "Category: " + newCategory.title + ",  " + "Rank: " + newCategory.weight + ",  " + "Filled Percent: " + newCategory.existingAmount + "/" + newCategory.neededAmount);
         }
       }
     });
@@ -101,16 +126,19 @@ public class HomePage {
         String amountString = (String) withdrawAmountField.getText();
         String sourceString = (String) withdrawSourceField.getText();
 
-        Integer totalAmount = Integer.parseInt(amountString);
         Double doubleTotalAmount = Double.parseDouble(amountString);
 
         //Remove MONEY From CATEGORY SPREAD EVENLY
-        Category category = findCategory(sourceString);
-        category.deltaExistingAmount((doubleTotalAmount * -1));
 
-//        if(categoriesMap.containsKey(sourceString)) {
-//          categoriesMap.remove(sourceString, (Integer) totalAmount);
-//        }
+        int categoryIndex = findCategory(sourceString);
+
+        if(categoryIndex >= 0) {
+          categories.get(categoryIndex).existingAmount -= doubleTotalAmount;
+          totalAmountLeft += doubleTotalAmount;
+          totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
+        } else {
+          JOptionPane.showMessageDialog(null, "This category doesn't exist", "Alert", JOptionPane.WARNING_MESSAGE);
+        }
       }
     });
 
@@ -121,6 +149,12 @@ public class HomePage {
         if(incomeAmountField.isEditable()){
           incomeAmountField.setEditable(false);
           otherSalaryField.setEditable(false);
+          String incomeAmountText = (String) incomeAmountField.getText();
+          String otherSalaryText = (String) otherSalaryField.getText();
+
+          if(incomeAmountText.length() > 0 || otherSalaryText.length() > 0) {
+            addIncomeButton.setEnabled(true);
+          }
         }
         else{
           incomeAmountField.setEditable(true);
@@ -132,8 +166,14 @@ public class HomePage {
 
   }
 
-  public Category findCategory(String src){
-    return null;
+  public int findCategory(String src){
+    for(int i = 0; i < categories.size(); i++) {
+      if(categories.get(i).title.equals(src)) {
+        return i;
+      }
+    }
+
+    return -1;
   }
 
   public void setGraphics() {
@@ -204,6 +244,7 @@ public class HomePage {
     addIncomeButton = new JButton("Add Income");
     addIncomeButton.setBounds(350, 290, 150, 30);
     customizeButton(addIncomeButton);
+    addIncomeButton.setEnabled(false);
 
     askEditButton = new JButton("Edit");
     askEditButton.setBounds(370, 150, 115, 22);
@@ -301,6 +342,7 @@ public class HomePage {
     button.setBorder(new RoundedBorder(30)); //10 is the radius
     button.setForeground(Color.white);
   }
+
   private static class RoundedBorder implements Border {
     private int radius;
     RoundedBorder(int radius) {

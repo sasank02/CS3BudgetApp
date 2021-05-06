@@ -5,15 +5,13 @@ public class Category implements Comparable<Category> {
   Double neededAmount;
   Double filledPercent;
   int specialImportance;
-  boolean mandatoryFill;
   //comment
   //comment
-  public Category(String cTitle, Integer cWeight, Double cExistingAmount, Double cNeededAmount, boolean cMandatoryFill  ) {
+  public Category(String cTitle, Integer cWeight, Double cExistingAmount, Double cNeededAmount) {
     title = cTitle;
     weight = cWeight;
     existingAmount = cExistingAmount;
     neededAmount = cNeededAmount;
-    mandatoryFill = cMandatoryFill;
     filledPercent = (Double) 100.0 * existingAmount/neededAmount;
   }
 
@@ -39,9 +37,6 @@ public class Category implements Comparable<Category> {
   }
   public void setSpecialImportance(int newValue){
      specialImportance = newValue;
-  }
-  public void setMandatoryFill(boolean newValue){
-    mandatoryFill = newValue;
   }
 
   @Override
