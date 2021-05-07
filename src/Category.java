@@ -21,12 +21,6 @@ public class Category implements Comparable<Category> {
   public void updateFilledPercent(){
     filledPercent = (Double) existingAmount/neededAmount;
   }
-  public void changeTitle(String newValue){
-    title = newValue;
-  }
-  public void changeWeight(int newValue){
-    weight = newValue;
-  }
   public void deltaExistingAmount(Double newValue){
     existingAmount += newValue;
     updateFilledPercent();

@@ -18,29 +18,48 @@ public class HomePage {
   JTextField withdrawAmountField;
   JTextField withdrawSourceField;
   JButton askEditButton;
-  JList categoriesList;
-  MyListModel categoryListModel;
+  //JList categoriesList;
+  //MyListModel categoryListModel;
 
   ArrayList<Category> categories = new ArrayList<Category>();
   Stack<Category> categoryStack = new Stack<Category>();
+  ArrayList<JLabel> categoriesLabels = new ArrayList<JLabel>();
 
   Double totalAmountLeft = 0.0;
   JLabel totalAmountLeftLabel = new JLabel("Amount Left: $" + totalAmountLeft);
+  JCheckBox totalAmountLeftCheckBox = new JCheckBox("+ Amount Left");
+
+  JScrollPane categoriesScrollPane = new JScrollPane();
+  JPanel categoriesPanel = new JPanel();
 
   public HomePage() {
     setGraphics();
 
-    categoryListModel = new MyListModel();
+    /*categoryListModel = new MyListModel();
     categoriesList=new JList(categoryListModel);
     categoriesList.setBounds(30, 200, 240, 400);
     categoriesList.setFixedCellHeight(50);
     categoriesList.setFont(new Font("Heveltica",Font.BOLD,14));
-
-    panel.add(categoriesList);
+      */
+    //panel.add(categoriesList);
 
     panel.add(totalAmountLeftLabel);
     totalAmountLeftLabel.setFont(new Font("Times New Roman", Font.BOLD, 18));
-    totalAmountLeftLabel.setBounds(30, categoriesList.getY() + categoriesList.getHeight() + 10, 200, 40);
+    totalAmountLeftLabel.setBounds(30, 600 + 10, 200, 40);
+
+    categoriesPanel.setLayout(new BoxLayout(categoriesPanel, BoxLayout.Y_AXIS));
+    categoriesScrollPane.add(categoriesPanel);
+    categoriesPanel.revalidate();
+    categoriesPanel.repaint();
+    categoriesPanel.setPreferredSize(new Dimension(240, 400));
+    panel.add(categoriesScrollPane);
+    categoriesScrollPane.setBounds(30, 200, 240, 400);
+    categoriesScrollPane.setViewportView(categoriesPanel);
+    categoriesScrollPane.validate();
+    categoriesScrollPane.getVerticalScrollBar().setUnitIncrement(10);
+
+    panel.add(totalAmountLeftCheckBox);
+    totalAmountLeftCheckBox.setBounds(475, 455, 125, 30);
 
   }
 
@@ -62,11 +81,37 @@ public class HomePage {
           Category newCategory = new Category(categoryName.getText(), Integer.parseInt(categoryRank.getText()), Double.parseDouble(categoryExistingAmount.getText()), Double.parseDouble(categoryAmountNeeded.getText()));
           //TODO: VALIDATE FIELDS
 
-          String toPlace = "" + ((Integer) newCategory.weight) + ") " + newCategory.title.toUpperCase() + "  $" + newCategory.existingAmount + "/$" + newCategory.neededAmount;
-          categoryListModel.addElement(toPlace);
+          String toPlace = " " + ((Integer) newCategory.weight) + ") " + newCategory.title.toUpperCase() + "  $" + newCategory.existingAmount + "/$" + newCategory.neededAmount;
+          //categoryListModel.addElement(toPlace);
+          categoriesPanel.removeAll();
 
           categories.add(newCategory.weight - 1, newCategory);
-          System.out.println("INPUT: " + "Category: " + newCategory.title + ",  " + "Rank: " + newCategory.weight + ",  " + "Filled Percent: " + newCategory.existingAmount + "/" + newCategory.neededAmount);
+
+          JLabel newCategoryLabel = new JLabel(toPlace, SwingConstants.CENTER); //User can see the update in categories list
+          newCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 18));
+          categoriesLabels.add(newCategory.weight - 1, newCategoryLabel);
+
+          for(int i = 0; i < categoriesLabels.size(); i++) {
+            categoriesPanel.add(categoriesLabels.get(i));
+          }
+
+          if(totalAmountLeft > 0.0) {
+            totalAmountLeft = updateCategoryList(totalAmountLeft);
+          }
+
+          totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
+
+          updateCategoryRank();
+
+          categoriesPanel.revalidate();
+          categoriesPanel.repaint();
+
+          System.out.println();
+
+          for(int k = 0; k < categories.size(); k++) {
+            Category category = categories.get(k);
+            System.out.println("INPUT: " + "Category: " + category.title + ",  " + "Rank: " + category.weight + ",  " + "Filled Percent: " + category.existingAmount + "/" + category.neededAmount);
+          }
         }
       }
     });
@@ -86,26 +131,10 @@ public class HomePage {
 
         //ADD MONEY TO CATEGORY SPREAD EVENLY
 
-        int i = 0;
-        while(i < categories.size()) {
-          if(totalAmount > 0.0) {
-            Category category = categories.get(i);
-            Double amountLeftToPay = category.neededAmount - category.existingAmount;
-            category.existingAmount += totalAmount;
-            if(totalAmount < amountLeftToPay) {
-              totalAmount = 0.0;
-            } else if(totalAmount >= amountLeftToPay) {
-              totalAmount -= amountLeftToPay;
-              categoryStack.push(category); //adds the category to the stack
-              categories.remove(i);
-            }
-          } else {
-            break;
-          }
-        }
-
-        totalAmountLeft += totalAmount;
+        totalAmountLeft += updateCategoryList(totalAmount);
         totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
+
+        updateCategoryRank();
 
         System.out.println();
 
@@ -134,8 +163,13 @@ public class HomePage {
 
         if(categoryIndex >= 0) {
           categories.get(categoryIndex).existingAmount -= doubleTotalAmount;
-          totalAmountLeft += doubleTotalAmount;
-          totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
+          if(totalAmountLeftCheckBox.isSelected()) {
+            totalAmountLeft += doubleTotalAmount;
+            totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
+          }
+          categoriesLabels.get(categoryIndex).setText(" " + ((Integer) categories.get(categoryIndex).weight) + ") " + categories.get(categoryIndex).title.toUpperCase() + "  $" + categories.get(categoryIndex).existingAmount + "/$"  + categories.get(categoryIndex).neededAmount);
+          categoriesPanel.revalidate();
+          categoriesPanel.repaint();
         } else {
           JOptionPane.showMessageDialog(null, "This category doesn't exist", "Alert", JOptionPane.WARNING_MESSAGE);
         }
@@ -168,7 +202,7 @@ public class HomePage {
 
   public int findCategory(String src){
     for(int i = 0; i < categories.size(); i++) {
-      if(categories.get(i).title.equals(src)) {
+      if(categories.get(i).title.toUpperCase().equals(src.toUpperCase())) {
         return i;
       }
     }
@@ -178,7 +212,7 @@ public class HomePage {
 
   public void setGraphics() {
     JFrame frame = new JFrame("Budget");
-    frame.setSize(600, 700);
+    frame.setSize(625, 700);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setLocationRelativeTo(null);
 
@@ -265,7 +299,7 @@ public class HomePage {
     withdrawAmountLabel.setFont(new Font("Heveltica", Font.PLAIN, 15));
 
     withdrawAmountField = new JTextField();
-    withdrawAmountField.setBounds(370, 455, 150, 20);
+    withdrawAmountField.setBounds(370, 455, 100, 20);
     withdrawAmountField.setBorder(null);
     withdrawAmountField.setBorder( new MatteBorder(0, 0, 2, 0, Color.white));
     withdrawAmountField.setBackground(new Color(0, 0, 0, 0));
@@ -342,6 +376,44 @@ public class HomePage {
   public void customizeButton(JButton button) {
     button.setBorder(new RoundedBorder(30)); //10 is the radius
     button.setForeground(Color.white);
+  }
+
+  public void updateCategoryRank() {
+    //assigns new rank for each category if categories are removed
+    for (int i = 0; i < categories.size(); i++) {
+      categories.get(i).weight = i + 1;
+      categoriesLabels.get(i).setText(" " + ((Integer) categories.get(i).weight) + ") " + categories.get(i).title.toUpperCase() + "  $" + categories.get(i).existingAmount + "/$" + categories.get(i).neededAmount);
+    }
+  }
+
+  public Double updateCategoryList(Double totalAmount) {
+    int i = 0;
+    while(i < categories.size()) {
+      if(totalAmount > 0.0) {
+        Category category = categories.get(i);
+        Double amountLeftToPay = category.neededAmount - category.existingAmount;
+        if(totalAmount < amountLeftToPay) {
+          category.existingAmount += totalAmount;
+          totalAmount = 0.0;
+        } else if(totalAmount >= amountLeftToPay) {
+          category.existingAmount += amountLeftToPay;
+          totalAmount -= amountLeftToPay;
+          categoryStack.push(category); //adds the category to the stack
+          categories.remove(i);
+          categoriesPanel.remove(categoriesLabels.get(i)); //removes the category from the categories list (ScrollPane)
+          categoriesLabels.remove(i);
+        }
+      } else {
+        break;
+      }
+    }
+
+    updateCategoryRank();
+
+    categoriesPanel.revalidate();
+    categoriesPanel.repaint();
+
+    return totalAmount;
   }
 
   private static class RoundedBorder implements Border {
