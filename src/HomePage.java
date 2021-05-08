@@ -126,21 +126,34 @@ public class HomePage {
         String amountString = (String) incomeAmountField.getText();
         String otherSalaryString = (String) otherSalaryField.getText();
 
-        Double totalAmount = Double.parseDouble(amountString) + Double.parseDouble(otherSalaryString) + totalAmountLeft;
-        totalAmountLeft = 0.0;
+        Double amount = 0.0;
+        Double otherSalary = 0.0;
 
-        //ADD MONEY TO CATEGORY SPREAD EVENLY
+        if(amountString.length() > 0) {
+          amount = Double.parseDouble(amountString);
+        }
 
-        totalAmountLeft += updateCategoryList(totalAmount);
-        totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
+        if(otherSalaryString.length() > 0) {
+          otherSalary = Double.parseDouble(otherSalaryString);
+        }
 
-        updateCategoryRank();
+        if(amount > 0.0 || otherSalary > 0.0) {
+          Double totalAmount = amount + otherSalary + totalAmountLeft;
+          totalAmountLeft = 0.0;
 
-        System.out.println();
+          //ADD MONEY TO CATEGORY SPREAD EVENLY
 
-        for(int k = 0; k < categories.size(); k++) {
-          Category newCategory = categories.get(k);
-          System.out.println("INPUT: " + "Category: " + newCategory.title + ",  " + "Rank: " + newCategory.weight + ",  " + "Filled Percent: " + newCategory.existingAmount + "/" + newCategory.neededAmount);
+          totalAmountLeft += updateCategoryList(totalAmount);
+          totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
+
+          updateCategoryRank();
+
+          System.out.println();
+
+          for (int k = 0; k < categories.size(); k++) {
+            Category newCategory = categories.get(k);
+            System.out.println("INPUT: " + "Category: " + newCategory.title + ",  " + "Rank: " + newCategory.weight + ",  " + "Filled Percent: " + newCategory.existingAmount + "/" + newCategory.neededAmount);
+          }
         }
       }
     });
@@ -183,12 +196,6 @@ public class HomePage {
         if(incomeAmountField.isEditable()){
           incomeAmountField.setEditable(false);
           otherSalaryField.setEditable(false);
-          String incomeAmountText = (String) incomeAmountField.getText();
-          String otherSalaryText = (String) otherSalaryField.getText();
-
-          if(incomeAmountText.length() > 0 || otherSalaryText.length() > 0) {
-            addIncomeButton.setEnabled(true);
-          }
         }
         else{
           incomeAmountField.setEditable(true);
@@ -279,7 +286,6 @@ public class HomePage {
     addIncomeButton = new JButton("Add Income");
     addIncomeButton.setBounds(350, 290, 150, 30);
     customizeButton(addIncomeButton);
-    addIncomeButton.setEnabled(false);
 
     askEditButton = new JButton("Edit");
     askEditButton.setBounds(370, 150, 115, 22);
