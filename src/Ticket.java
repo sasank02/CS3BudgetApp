@@ -1,32 +1,32 @@
 import java.util.Date;
 
-public class Expense {
-  private int expenseAmount;
+public class Ticket {
+  private Double expenseAmount;
   private String expenseType;
-  private Date expenseDate;
-  public Expense(String type, int amount, Date date){
+  private String expenseDate;
+  public Ticket(String type, Double amount, String date){
     expenseAmount = amount;
     expenseDate = date;
     expenseType = type;
   }
   //GET METHODS
-  public int getExpenseAmount(){
+  public Double getExpenseAmount(){
     return expenseAmount;
   }
   public String getExpenseType(){
     return expenseType;
   }
-  public Date getExpenseDate(){
+  public String getExpenseDate(){
     return expenseDate;
   }
 
   //SET METHODS
-  public int setExpenseAmount(int newAmount){
+  public Double setExpenseAmount(Double newAmount){
     expenseAmount = newAmount;
     return newAmount;
   }
 
-  public Date setExpenseDate(Date newAmount){
+  public String setExpenseDate(String newAmount){
     expenseDate = newAmount;
     return expenseDate;
   }
@@ -36,7 +36,7 @@ public class Expense {
     return expenseType;
   }
 
-  public int compareTo(Expense e, String comparator){
+  public int compareTo(Ticket e, String comparator){
     if(comparator == "Amount"){
       if(e.getExpenseAmount() > expenseAmount) return -1; //e is larger
       if(e.getExpenseAmount() < expenseAmount) return 1;
