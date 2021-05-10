@@ -18,14 +18,12 @@ public class HomePage {
   JTextField incomeAmountField;
   JTextField otherSalaryField;
   JTextField withdrawAmountField;
-  JTextField withdrawSourceField;
   JButton askEditButton;
-  //JList categoriesList;
-  //MyListModel categoryListModel;
 
   ArrayList<Category> categories = new ArrayList<Category>();
   Stack<Category> categoryStack = new Stack<Category>();
   ArrayList<JLabel> categoriesLabels = new ArrayList<JLabel>();
+  JComboBox<String> categoriesComboBox = new JComboBox<String>(); // this is the drop down for withdrawing a category
 
   Double totalAmountLeft = 0.0;
   JLabel totalAmountLeftLabel = new JLabel("Amount Left: $" + totalAmountLeft);
@@ -42,14 +40,6 @@ public class HomePage {
 
   public HomePage() {
     setGraphics();
-
-    /*categoryListModel = new MyListModel();
-    categoriesList=new JList(categoryListModel);
-    categoriesList.setBounds(30, 200, 240, 400);
-    categoriesList.setFixedCellHeight(50);
-    categoriesList.setFont(new Font("Heveltica",Font.BOLD,14));
-      */
-    //panel.add(categoriesList);
 
     panel.add(totalAmountLeftLabel);
     totalAmountLeftLabel.setFont(new Font("Times New Roman", Font.BOLD, 18));
@@ -68,7 +58,8 @@ public class HomePage {
     categoriesScrollPane.validate();
     categoriesScrollPane.getVerticalScrollBar().setUnitIncrement(10);
 
-
+    panel.add(categoriesComboBox);
+    categoriesComboBox.setBounds(370, 505, 120,20);
 
     recentTransactionsPanel.setLayout(new BoxLayout(recentTransactionsPanel, BoxLayout.Y_AXIS));
     recentTransactionsPane.add(recentTransactionsPanel);
@@ -133,6 +124,7 @@ public class HomePage {
           categoriesPanel.revalidate();
           categoriesPanel.repaint();
 
+          updateWithdrawCategoryDropDownMenu();
 
           //DATE
           DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -168,6 +160,8 @@ public class HomePage {
           otherSalary = Double.parseDouble(otherSalaryString);
         }
 
+        int oldCategoriesListSize = categories.size();
+
         if(amount > 0.0 || otherSalary > 0.0) {
           Double totalAmount = amount + otherSalary + totalAmountLeft;
           totalAmountLeft = 0.0;
@@ -187,6 +181,10 @@ public class HomePage {
             Category newCategory = categories.get(k);
             System.out.println("INPUT: " + "Category: " + newCategory.title + ",  " + "Rank: " + newCategory.weight + ",  " + "Filled Percent: " + newCategory.existingAmount + "/" + newCategory.neededAmount);
           }
+
+          if(categories.size() != oldCategoriesListSize) {
+            updateWithdrawCategoryDropDownMenu();
+          }
         }
       }
     });
@@ -196,10 +194,9 @@ public class HomePage {
       public void actionPerformed(ActionEvent e) {
         //SECURE DATA FROM TEXT FIELDS
         withdrawAmountField.setEditable(false);
-        withdrawSourceField.setEditable(false);
 
         String amountString = (String) withdrawAmountField.getText();
-        String sourceString = (String) withdrawSourceField.getText();
+        String sourceString = (String) categoriesComboBox.getSelectedItem();
 
         Double doubleTotalAmount = Double.parseDouble(amountString);
 
@@ -346,6 +343,7 @@ public class HomePage {
     askEditButton.setBorder(new RoundedBorder(22)); //10 is the radius
     askEditButton.setForeground(Color.white);
     panel.add(askEditButton);
+    customizeButton(askEditButton);
 
     //WITHDRAW
     JLabel withdrawLabel = new JLabel("Withdraw");
@@ -369,16 +367,9 @@ public class HomePage {
     withdrawSourceLabel.setBounds(297, 500, 80, 30);
     withdrawSourceLabel.setFont(new Font("Heveltica", Font.PLAIN, 15));
 
-    withdrawSourceField = new JTextField();
-    withdrawSourceField.setBounds(370, 505, 150, 20);
-    withdrawSourceField.setBorder(null);
-    withdrawSourceField.setBorder( new MatteBorder(0, 0, 2, 0, Color.white));
-    withdrawSourceField.setBackground(new Color(0, 0, 0, 0));
-
     withdrawButton = new JButton("Withdraw");
     withdrawButton.setBounds(350, 555, 150, 30);
     customizeButton(withdrawButton);
-    withdrawSourceField.setEditable(false);
     withdrawAmountField.setEditable(false);
 
     JButton askWithdrawButton = new JButton("Edit");
@@ -386,17 +377,16 @@ public class HomePage {
     askWithdrawButton.setBorder(new RoundedBorder(22)); //10 is the radius
     askWithdrawButton.setForeground(Color.white);
     panel.add(askWithdrawButton);
+    customizeButton(askWithdrawButton);
 
     askWithdrawButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         //SECURE DATA FROM TEXT FIELDS
-        if(withdrawSourceField.isEditable()){
-          withdrawSourceField.setEditable(false);
+        if(withdrawAmountField.isEditable()){
           withdrawAmountField.setEditable(false);
         }
         else{
-          withdrawSourceField.setEditable(true);
           withdrawAmountField.setEditable(true);
         }
 
@@ -409,13 +399,14 @@ public class HomePage {
     addCategoryButton.setBorder(new RoundedBorder(30)); //10 is the radius
     addCategoryButton.setForeground(Color.white);
     panel.add(addCategoryButton);
+    customizeButton(addCategoryButton);
 //comment
     //comment
 
     panel.add(withdrawAmountLabel);
     panel.add(withdrawAmountField);
     panel.add(withdrawSourceLabel);
-    panel.add(withdrawSourceField);
+    //panel.add(withdrawSourceField);
     panel.add(withdrawButton);
     panel.add(recentTransactionsLabel);
     panel.add(recentTransactionsSubtitleLabel);
@@ -438,6 +429,7 @@ public class HomePage {
 
   public void customizeButton(JButton button) {
     button.setBorder(new RoundedBorder(30)); //10 is the radius
+    button.setContentAreaFilled(false);
   }
 
   public void updateCategoryRank() {
@@ -462,8 +454,8 @@ public class HomePage {
           totalAmount -= amountLeftToPay;
           categoryStack.push(category); //adds the category to the stack
           categories.remove(i);
-//          categoriesPanel.remove(categoriesLabels.get(i)); //removes the category from the categories list (ScrollPane)
-//          categoriesLabels.remove(i);
+          categoriesPanel.remove(categoriesLabels.get(i)); //removes the category from the categories list (ScrollPane)
+          categoriesLabels.remove(i);
         }
       } else {
         break;
@@ -478,7 +470,13 @@ public class HomePage {
     return totalAmount;
   }
 
+  public void updateWithdrawCategoryDropDownMenu() {
+    categoriesComboBox.removeAllItems();
 
+    for(int i = 0; i < categories.size(); i++) {
+      categoriesComboBox.addItem(categories.get(i).title);
+    }
+  }
 
   private static class RoundedBorder implements Border {
     private int radius;
