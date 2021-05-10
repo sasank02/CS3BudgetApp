@@ -30,7 +30,7 @@ public class Category implements Comparable<Category> {
     updateFilledPercent();
   }
   public void setSpecialImportance(int newValue){
-     specialImportance = newValue;
+    specialImportance = newValue;
   }
 
   @Override

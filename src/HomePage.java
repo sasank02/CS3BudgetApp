@@ -5,6 +5,8 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class HomePage {
@@ -32,6 +34,12 @@ public class HomePage {
   JScrollPane categoriesScrollPane = new JScrollPane();
   JPanel categoriesPanel = new JPanel();
 
+  JScrollPane recentTransactionsPane = new JScrollPane();
+  JPanel recentTransactionsPanel = new JPanel();
+  Stack<Ticket> recentTransStack = new Stack<Ticket>();
+  ArrayList<JLabel> recentTransLabels = new ArrayList<JLabel>();
+
+
   public HomePage() {
     setGraphics();
 
@@ -52,11 +60,30 @@ public class HomePage {
     categoriesPanel.revalidate();
     categoriesPanel.repaint();
     categoriesPanel.setPreferredSize(new Dimension(240, 400));
+
+
     panel.add(categoriesScrollPane);
     categoriesScrollPane.setBounds(30, 200, 240, 400);
     categoriesScrollPane.setViewportView(categoriesPanel);
     categoriesScrollPane.validate();
     categoriesScrollPane.getVerticalScrollBar().setUnitIncrement(10);
+
+
+
+    recentTransactionsPanel.setLayout(new BoxLayout(recentTransactionsPanel, BoxLayout.Y_AXIS));
+    recentTransactionsPane.add(recentTransactionsPanel);
+    recentTransactionsPanel.revalidate();
+    recentTransactionsPanel.repaint();
+    recentTransactionsPanel.setPreferredSize(new Dimension(240, 400));
+
+
+    panel.add(recentTransactionsPane);
+    recentTransactionsPane.setBounds(625, 200, 240, 400);
+    recentTransactionsPane.setViewportView(recentTransactionsPanel);
+    recentTransactionsPane.validate();
+    recentTransactionsPane.getVerticalScrollBar().setUnitIncrement(10);
+
+
 
     panel.add(totalAmountLeftCheckBox);
     totalAmountLeftCheckBox.setBounds(475, 455, 125, 30);
@@ -106,7 +133,11 @@ public class HomePage {
           categoriesPanel.revalidate();
           categoriesPanel.repaint();
 
-          System.out.println();
+
+          //DATE
+          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+          Date date = new Date();
+          recentTransStack.push(new Ticket("New Category", 0.0 ,  dateFormat.format(date)));
 
           for(int k = 0; k < categories.size(); k++) { // prints the list
             Category category = categories.get(k);
@@ -142,13 +173,15 @@ public class HomePage {
           totalAmountLeft = 0.0;
 
           //ADD MONEY TO CATEGORY SPREAD EVENLY
-
           totalAmountLeft += updateCategoryList(totalAmount);
           totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
-
           updateCategoryRank();
 
-          System.out.println();
+          //DATE
+          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+          Date date = new Date();
+
+          recentTransStack.push(new Ticket("Income", amount+otherSalary ,  dateFormat.format(date)));
 
           for (int k = 0; k < categories.size(); k++) {
             Category newCategory = categories.get(k);
@@ -180,6 +213,15 @@ public class HomePage {
             totalAmountLeft += doubleTotalAmount;
             totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
           }
+
+
+          //DATE
+          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+          Date date = new Date();
+
+          recentTransStack.push(new Ticket("Withdrawal", doubleTotalAmount ,  dateFormat.format(date)));
+
+
           categoriesLabels.get(categoryIndex).setText(" " + ((Integer) categories.get(categoryIndex).weight) + ") " + categories.get(categoryIndex).title.toUpperCase() + "  $" + categories.get(categoryIndex).existingAmount + "/$"  + categories.get(categoryIndex).neededAmount);
           categoriesPanel.revalidate();
           categoriesPanel.repaint();
@@ -219,7 +261,7 @@ public class HomePage {
 
   public void setGraphics() {
     JFrame frame = new JFrame("Budget");
-    frame.setSize(625, 700);
+    frame.setSize(900, 700);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setLocationRelativeTo(null);
 
@@ -246,13 +288,25 @@ public class HomePage {
 
     JLabel titleLabel = new JLabel("Budget Manager");
     titleLabel.setForeground(Color.white);
-    titleLabel.setBounds(180, 40, 400, 50);
+    titleLabel.setBounds(320, 40, 400, 50);
     titleLabel.setFont(new Font("Heveltica", Font.BOLD, 25));
 
     JLabel categoriesLabel = new JLabel("Categories");
     categoriesLabel.setForeground(Color.white);
     categoriesLabel.setBounds(60, 100, 400, 50);
     categoriesLabel.setFont(new Font("Heveltica", Font.BOLD, 18));
+
+    JLabel recentTransactionsLabel = new JLabel("Recent Actions");
+    recentTransactionsLabel.setForeground(Color.white);
+    recentTransactionsLabel.setBounds(665, 100, 400, 50);
+    recentTransactionsLabel.setFont(new Font("Heveltica", Font.BOLD, 18));
+
+    String text = "All your recent incomes," + "<br>" +
+      "withdrawals, and actions are here" + "<br>" + "<br>";
+    JLabel recentTransactionsSubtitleLabel = new JLabel("<html><div style='text-align: center;'>" + text + "</div></html>");
+    recentTransactionsSubtitleLabel.setForeground(Color.white);
+    recentTransactionsSubtitleLabel.setBounds(620, 145, 400, 50);
+    recentTransactionsSubtitleLabel.setFont(new Font("Heveltica", Font.PLAIN, 14));
 
     JLabel addIncomeLabel = new JLabel("Add Income");
     addIncomeLabel.setForeground(Color.white);
@@ -363,6 +417,9 @@ public class HomePage {
     panel.add(withdrawSourceLabel);
     panel.add(withdrawSourceField);
     panel.add(withdrawButton);
+    panel.add(recentTransactionsLabel);
+    panel.add(recentTransactionsSubtitleLabel);
+
 
     panel.add(addIncomeButton);
     panel.add(incomeAmountLabel);
@@ -396,7 +453,7 @@ public class HomePage {
     while(i < categories.size()) {
       if(totalAmount > 0.0) {
         Category category = categories.get(i);
-        Double amountLeftToPay = category.neededAmount - category.existingAmount;
+        double amountLeftToPay = category.neededAmount - category.existingAmount;
         if(totalAmount < amountLeftToPay) {
           category.existingAmount += totalAmount;
           totalAmount = 0.0;
@@ -405,8 +462,8 @@ public class HomePage {
           totalAmount -= amountLeftToPay;
           categoryStack.push(category); //adds the category to the stack
           categories.remove(i);
-          categoriesPanel.remove(categoriesLabels.get(i)); //removes the category from the categories list (ScrollPane)
-          categoriesLabels.remove(i);
+//          categoriesPanel.remove(categoriesLabels.get(i)); //removes the category from the categories list (ScrollPane)
+//          categoriesLabels.remove(i);
         }
       } else {
         break;
@@ -420,6 +477,8 @@ public class HomePage {
 
     return totalAmount;
   }
+
+
 
   private static class RoundedBorder implements Border {
     private int radius;
@@ -455,4 +514,3 @@ class MyListModel extends AbstractListModel {
   @Override
   public int getSize() { return myArrayList.size(); }
 }
-
