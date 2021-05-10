@@ -101,14 +101,14 @@ public class HomePage {
 
           totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
 
-          updateCategoryRank();
+          updateCategoryRank(); // updates the rank
 
           categoriesPanel.revalidate();
           categoriesPanel.repaint();
 
           System.out.println();
 
-          for(int k = 0; k < categories.size(); k++) {
+          for(int k = 0; k < categories.size(); k++) { // prints the list
             Category category = categories.get(k);
             System.out.println("INPUT: " + "Category: " + category.title + ",  " + "Rank: " + category.weight + ",  " + "Filled Percent: " + category.existingAmount + "/" + category.neededAmount);
           }
@@ -381,7 +381,6 @@ public class HomePage {
 
   public void customizeButton(JButton button) {
     button.setBorder(new RoundedBorder(30)); //10 is the radius
-    button.setForeground(Color.white);
   }
 
   public void updateCategoryRank() {
