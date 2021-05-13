@@ -1,11 +1,13 @@
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -15,13 +17,13 @@ public class HomePage {
   JButton addIncomeButton;
   JButton withdrawButton;
   JButton addCategoryButton;
+  JButton cancelACategoryButton;
   JTextField incomeAmountField;
   JTextField otherSalaryField;
   JTextField withdrawAmountField;
   JButton askEditButton;
 
   ArrayList<Category> categories = new ArrayList<Category>();
-  Stack<Category> categoryStack = new Stack<Category>();
   ArrayList<JLabel> categoriesLabels = new ArrayList<JLabel>();
   JComboBox<String> categoriesComboBox = new JComboBox<String>(); // this is the drop down for withdrawing a category
 
@@ -37,20 +39,20 @@ public class HomePage {
   Stack<Ticket> recentTransStack = new Stack<Ticket>();
   ArrayList<JLabel> recentTransLabels = new ArrayList<JLabel>();
 
+  Timer timer;
 
   public HomePage() {
     setGraphics();
 
     panel.add(totalAmountLeftLabel);
     totalAmountLeftLabel.setFont(new Font("Times New Roman", Font.BOLD, 18));
-    totalAmountLeftLabel.setBounds(30, 600 + 10, 200, 40);
+    totalAmountLeftLabel.setBounds(30, 610, 200, 40);
 
-    categoriesPanel.setLayout(new BoxLayout(categoriesPanel, BoxLayout.Y_AXIS));
+    categoriesPanel.setLayout(new BoxLayout(categoriesPanel, BoxLayout.PAGE_AXIS));
     categoriesScrollPane.add(categoriesPanel);
+    categoriesPanel.setPreferredSize(new Dimension(400, 400));
     categoriesPanel.revalidate();
     categoriesPanel.repaint();
-    categoriesPanel.setPreferredSize(new Dimension(240, 400));
-
 
     panel.add(categoriesScrollPane);
     categoriesScrollPane.setBounds(30, 200, 240, 400);
@@ -90,28 +92,66 @@ public class HomePage {
         JTextField categoryRank = new JTextField();
         JTextField categoryExistingAmount = new JTextField();
         JTextField categoryAmountNeeded = new JTextField();
+        JTextField categoryDeadline = new JTextField();
+        categoryDeadline.setEditable(false);
 
+        JRadioButton regularyCategoryButton = new JRadioButton("Regular Category");
+        JRadioButton timedCategoryButton = new JRadioButton("Timed Category");
+        ButtonGroup group = new ButtonGroup();
+        group.add(regularyCategoryButton);
+        group.add(timedCategoryButton);
+        regularyCategoryButton.setSelected(true);
 
-        Object[] fields = {"Category Name:", categoryName , "Category Rank:", categoryRank, "Existing Amount:" , categoryExistingAmount, "Amount Needed:", categoryAmountNeeded};
+        regularyCategoryButton.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            categoryDeadline.removeAll();
+            categoryDeadline.setEditable(false);
+          }
+        });
+
+        timedCategoryButton.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            categoryDeadline.setEditable(true);
+          }
+        });
+
+        Object[] fields = {"Category Name:", categoryName , "Category Rank:", categoryRank, "Existing Amount:" , categoryExistingAmount, "Amount Needed:", categoryAmountNeeded, "Category Type:", regularyCategoryButton, timedCategoryButton, "Category Deadline:", categoryDeadline};
         int input = JOptionPane.showConfirmDialog(null, fields, "New Category", JOptionPane.OK_CANCEL_OPTION);
 
         if(input == 0) {
-          Category newCategory = new Category(categoryName.getText(), Integer.parseInt(categoryRank.getText()), Double.parseDouble(categoryExistingAmount.getText()), Double.parseDouble(categoryAmountNeeded.getText()));
-          //TODO: VALIDATE FIELDS
+          Category newCategory = null;
 
-          String toPlace = " " + ((Integer) newCategory.weight) + ") " + newCategory.title.toUpperCase() + "  $" + newCategory.existingAmount + "/$" + newCategory.neededAmount;
-          //categoryListModel.addElement(toPlace);
-          categoriesPanel.removeAll();
+          if(regularyCategoryButton.isSelected()) {
+            newCategory = new Category(categoryName.getText(), Integer.parseInt(categoryRank.getText()), Double.parseDouble(categoryExistingAmount.getText()), Double.parseDouble(categoryAmountNeeded.getText()));
+            String toPlace = ((Integer) newCategory.weight) + ") " + newCategory.title.toUpperCase() + "  $" + newCategory.existingAmount + "/$" + newCategory.neededAmount;
+
+            JLabel newCategoryLabel = new JLabel(toPlace, SwingConstants.CENTER); //User can see the update in categories list
+            newCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 18));
+            categoriesLabels.add(newCategory.weight - 1, newCategoryLabel);
+          } else if(timedCategoryButton.isSelected()) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Date deadLine = null;
+            try {
+              deadLine = (Date) dateFormat.parse((String) categoryDeadline.getText());
+            } catch (ParseException parseException) {
+              parseException.printStackTrace();
+            }
+
+            newCategory = new TimedCategory(categoryName.getText(), Integer.parseInt(categoryRank.getText()), Double.parseDouble(categoryExistingAmount.getText()), Double.parseDouble(categoryAmountNeeded.getText()), deadLine);
+
+            String categoryInfo = " " + ((Integer) newCategory.weight) + ") " + newCategory.title.toUpperCase() + "  $" + newCategory.existingAmount + "/$" + newCategory.neededAmount + "  Deadline: " + categoryDeadline.getText();
+            String info1 = categoryInfo.substring(0, categoryInfo.indexOf("  Deadline: "));
+            String info2 = categoryInfo.substring(categoryInfo.indexOf("  Deadline: "));
+            JLabel newCategoryLabel = new JLabel("<html>" + info1 + "<br/>" + info2 + "</html>");
+            newCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 18));
+            categoriesLabels.add(newCategory.weight - 1, newCategoryLabel);
+          }
 
           categories.add(newCategory.weight - 1, newCategory);
 
-          JLabel newCategoryLabel = new JLabel(toPlace, SwingConstants.CENTER); //User can see the update in categories list
-          newCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 18));
-          categoriesLabels.add(newCategory.weight - 1, newCategoryLabel);
-
-          for(int i = 0; i < categoriesLabels.size(); i++) {
-            categoriesPanel.add(categoriesLabels.get(i));
-          }
+          addCategoriesInScrollPane();
 
           if(totalAmountLeft > 0.0) {
             totalAmountLeft = updateCategoryList(totalAmountLeft);
@@ -130,11 +170,27 @@ public class HomePage {
           DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
           Date date = new Date();
           recentTransStack.push(new Ticket("New Category", 0.0 ,  dateFormat.format(date)));
+        }
+      }
+    });
 
-          for(int k = 0; k < categories.size(); k++) { // prints the list
-            Category category = categories.get(k);
-            System.out.println("INPUT: " + "Category: " + category.title + ",  " + "Rank: " + category.weight + ",  " + "Filled Percent: " + category.existingAmount + "/" + category.neededAmount);
-          }
+    cancelACategoryButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        JComboBox<String> categoriesList = new JComboBox<String>();
+        for(int i = 0; i < categories.size(); i++) {
+          categoriesList.addItem(categories.get(i).title);
+        }
+
+        int input = JOptionPane.showConfirmDialog(null, categoriesList, "Category Cancellation", JOptionPane.OK_CANCEL_OPTION);
+
+        if(input == 0) {
+          categories.remove(categoriesList.getSelectedIndex());
+          categoriesLabels.remove(categoriesList.getSelectedIndex());
+          addCategoriesInScrollPane();
+          updateCategoryRank();
+          categoriesPanel.revalidate();
+          categoriesPanel.repaint();
         }
       }
     });
@@ -395,18 +451,25 @@ public class HomePage {
 
 
     addCategoryButton = new JButton("Add Category");
-    addCategoryButton.setBounds(40, 150, 150, 30);
+    addCategoryButton.setBounds(10, 150, 150, 30);
     addCategoryButton.setBorder(new RoundedBorder(30)); //10 is the radius
     addCategoryButton.setForeground(Color.white);
     panel.add(addCategoryButton);
     customizeButton(addCategoryButton);
+
+    cancelACategoryButton = new JButton("Cancel Category");
+    cancelACategoryButton.setBounds(165, 150, 165, 30);
+    cancelACategoryButton.setBorder(new RoundedBorder(30)); //10 is the radius
+    cancelACategoryButton.setForeground(Color.white);
+    panel.add(cancelACategoryButton);
+    customizeButton(cancelACategoryButton);
+
 //comment
     //comment
 
     panel.add(withdrawAmountLabel);
     panel.add(withdrawAmountField);
     panel.add(withdrawSourceLabel);
-    //panel.add(withdrawSourceField);
     panel.add(withdrawButton);
     panel.add(recentTransactionsLabel);
     panel.add(recentTransactionsSubtitleLabel);
@@ -425,6 +488,14 @@ public class HomePage {
 
     setListeners();
 
+    timer = new Timer(1000, new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        categoryDeadlineCheck();
+      }
+    });
+
+    timer.start();
   }
 
   public void customizeButton(JButton button) {
@@ -436,7 +507,16 @@ public class HomePage {
     //assigns new rank for each category if categories are removed
     for (int i = 0; i < categories.size(); i++) {
       categories.get(i).weight = i + 1;
-      categoriesLabels.get(i).setText(" " + ((Integer) categories.get(i).weight) + ") " + categories.get(i).title.toUpperCase() + "  $" + categories.get(i).existingAmount + "/$" + categories.get(i).neededAmount);
+      Category category = categories.get(i);
+      if(categories.get(i) instanceof TimedCategory) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        String categoryInfo = " " + ((Integer) category.weight) + ") " + category.title.toUpperCase() + "  $" + category.existingAmount + "/$" + category.neededAmount + "  Deadline: " + dateFormat.format(((TimedCategory) categories.get(i)).deadline);
+        String info1 = categoryInfo.substring(0, categoryInfo.indexOf("  Deadline: "));
+        String info2 = categoryInfo.substring(categoryInfo.indexOf("  Deadline: "));
+        categoriesLabels.get(i).setText("<html>" + info1 + "<br/>" + info2 + "</html>");
+      } else {
+        categoriesLabels.get(i).setText(((Integer) category.weight) + ") " + category.title.toUpperCase() + "  $" + category.existingAmount + "/$" + category.neededAmount);
+      }
     }
   }
 
@@ -446,16 +526,19 @@ public class HomePage {
       if(totalAmount > 0.0) {
         Category category = categories.get(i);
         double amountLeftToPay = category.neededAmount - category.existingAmount;
-        if(totalAmount < amountLeftToPay) {
-          category.existingAmount += totalAmount;
-          totalAmount = 0.0;
-        } else if(totalAmount >= amountLeftToPay) {
-          category.existingAmount += amountLeftToPay;
-          totalAmount -= amountLeftToPay;
-          categoryStack.push(category); //adds the category to the stack
-          categories.remove(i);
-          categoriesPanel.remove(categoriesLabels.get(i)); //removes the category from the categories list (ScrollPane)
-          categoriesLabels.remove(i);
+        if(category instanceof TimedCategory == false || (category instanceof TimedCategory && ((TimedCategory) categories.get(i)).deadlinePassed == false)) {
+          if (totalAmount < amountLeftToPay) {
+            category.existingAmount += totalAmount;
+            totalAmount = 0.0;
+          } else if (totalAmount >= amountLeftToPay) {
+            category.existingAmount += amountLeftToPay;
+            totalAmount -= amountLeftToPay;
+            categories.remove(i);
+            categoriesPanel.remove(categoriesLabels.get(i)); //removes the category from the categories list (ScrollPane)
+            categoriesLabels.remove(i);
+          }
+        } else {
+          i++;
         }
       } else {
         break;
@@ -476,6 +559,32 @@ public class HomePage {
     for(int i = 0; i < categories.size(); i++) {
       categoriesComboBox.addItem(categories.get(i).title);
     }
+  }
+
+  public void addCategoriesInScrollPane() {
+    categoriesPanel.removeAll();
+
+    for(int i = 0; i < categoriesLabels.size(); i++) {
+      categoriesPanel.add(categoriesLabels.get(i));
+      categoriesPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+    }
+  }
+
+  public void categoryDeadlineCheck() {
+    for(int i = 0; i < categories.size(); i++) {
+      if(categories.get(i) instanceof TimedCategory) {
+
+        Date currentDate = new Date();
+        Date categoryDate = ((TimedCategory) categories.get(i)).deadline;
+
+        if(currentDate.compareTo(categoryDate) >= 0) {
+          categoriesLabels.get(i).setForeground(Color.red);
+          ((TimedCategory) categories.get(i)).deadlinePassed = true;
+        }
+      }
+    }
+    categoriesPanel.revalidate();
+    categoriesPanel.repaint();
   }
 
   private static class RoundedBorder implements Border {
