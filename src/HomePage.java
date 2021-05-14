@@ -6,6 +6,8 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,7 +25,7 @@ public class HomePage {
   JTextField withdrawAmountField;
   JButton askEditButton;
 
-  ArrayList<Category> categories = new ArrayList<Category>();
+  LinkedList<Category> categories = new LinkedList<Category>();  //linked list data structure is used instead of arraylist
   ArrayList<JLabel> categoriesLabels = new ArrayList<JLabel>();
   JComboBox<String> categoriesComboBox = new JComboBox<String>(); // this is the drop down for withdrawing a category
 
@@ -39,7 +41,7 @@ public class HomePage {
   Stack<Ticket> recentTransStack = new Stack<Ticket>();
   ArrayList<JLabel> recentTransLabels = new ArrayList<JLabel>();
 
-  Timer timer;
+  Timer timer; // used for keeping track of the current time which would be used to compare with the timed categories
 
   public HomePage() {
     setGraphics();
@@ -62,6 +64,7 @@ public class HomePage {
 
     panel.add(categoriesComboBox);
     categoriesComboBox.setBounds(370, 505, 120,20);
+    categoriesComboBox.setBorder(null);
 
     recentTransactionsPanel.setLayout(new BoxLayout(recentTransactionsPanel, BoxLayout.Y_AXIS));
     recentTransactionsPane.add(recentTransactionsPanel);
@@ -75,8 +78,6 @@ public class HomePage {
     recentTransactionsPane.setViewportView(recentTransactionsPanel);
     recentTransactionsPane.validate();
     recentTransactionsPane.getVerticalScrollBar().setUnitIncrement(10);
-
-
 
     panel.add(totalAmountLeftCheckBox);
     totalAmountLeftCheckBox.setBounds(475, 455, 125, 30);
@@ -105,7 +106,7 @@ public class HomePage {
         regularyCategoryButton.addActionListener(new ActionListener() {
           @Override
           public void actionPerformed(ActionEvent e) {
-            categoryDeadline.removeAll();
+            categoryDeadline.setText("");
             categoryDeadline.setEditable(false);
           }
         });
@@ -117,7 +118,7 @@ public class HomePage {
           }
         });
 
-        Object[] fields = {"Category Name:", categoryName , "Category Rank:", categoryRank, "Existing Amount:" , categoryExistingAmount, "Amount Needed:", categoryAmountNeeded, "Category Type:", regularyCategoryButton, timedCategoryButton, "Category Deadline:", categoryDeadline};
+        Object[] fields = {"Category Name:", categoryName , "Category Rank:", categoryRank, "Existing Amount:" , categoryExistingAmount, "Amount Needed:", categoryAmountNeeded, "Category Type:", regularyCategoryButton, timedCategoryButton, "Category Deadline (yyyy/MM/dd HH:mm:ss):", categoryDeadline};
         int input = JOptionPane.showConfirmDialog(null, fields, "New Category", JOptionPane.OK_CANCEL_OPTION);
 
         if(input == 0) {
@@ -187,6 +188,7 @@ public class HomePage {
         if(input == 0) {
           categories.remove(categoriesList.getSelectedIndex());
           categoriesLabels.remove(categoriesList.getSelectedIndex());
+          categoriesComboBox.removeItemAt(categoriesList.getSelectedIndex());
           addCategoriesInScrollPane();
           updateCategoryRank();
           categoriesPanel.revalidate();
@@ -227,20 +229,15 @@ public class HomePage {
           totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
           updateCategoryRank();
 
+          if(categories.size() != oldCategoriesListSize) {
+            updateWithdrawCategoryDropDownMenu();
+          }
+
           //DATE
           DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
           Date date = new Date();
 
           recentTransStack.push(new Ticket("Income", amount+otherSalary ,  dateFormat.format(date)));
-
-          for (int k = 0; k < categories.size(); k++) {
-            Category newCategory = categories.get(k);
-            System.out.println("INPUT: " + "Category: " + newCategory.title + ",  " + "Rank: " + newCategory.weight + ",  " + "Filled Percent: " + newCategory.existingAmount + "/" + newCategory.neededAmount);
-          }
-
-          if(categories.size() != oldCategoriesListSize) {
-            updateWithdrawCategoryDropDownMenu();
-          }
         }
       }
     });
@@ -534,7 +531,7 @@ public class HomePage {
             category.existingAmount += amountLeftToPay;
             totalAmount -= amountLeftToPay;
             categories.remove(i);
-            categoriesPanel.remove(categoriesLabels.get(i)); //removes the category from the categories list (ScrollPane)
+            categoriesPanel.remove(categoriesLabels.get(i)); //the user can visually see the category being removed
             categoriesLabels.remove(i);
           }
         } else {
@@ -546,6 +543,10 @@ public class HomePage {
     }
 
     updateCategoryRank();
+
+    if(categories.size() == 0) {
+      cancelACategoryButton.setEnabled(false);
+    }
 
     categoriesPanel.revalidate();
     categoriesPanel.repaint();
