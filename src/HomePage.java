@@ -121,26 +121,26 @@ public class HomePage {
         Object[] fields = {"Category Name:", categoryName , "Category Rank:", categoryRank, "Existing Amount:" , categoryExistingAmount, "Amount Needed:", categoryAmountNeeded, "Category Type:", regularyCategoryButton, timedCategoryButton, "Category Deadline (yyyy/MM/dd HH:mm:ss):", categoryDeadline};
         int input = JOptionPane.showConfirmDialog(null, fields, "New Category", JOptionPane.OK_CANCEL_OPTION);
 
-        if(input == 0) {
-          Category newCategory = null;
+        if(input == 0) { // if the user clicks ok to add a new category
+          Category newCategory = null; //new category is created
 
-          if(regularyCategoryButton.isSelected()) {
+          if(regularyCategoryButton.isSelected()) { // if the user created category that doesn't have a deadline
             newCategory = new Category(categoryName.getText(), Integer.parseInt(categoryRank.getText()), Double.parseDouble(categoryExistingAmount.getText()), Double.parseDouble(categoryAmountNeeded.getText()));
             String toPlace = ((Integer) newCategory.weight) + ") " + newCategory.title.toUpperCase() + "  $" + newCategory.existingAmount + "/$" + newCategory.neededAmount;
 
-            JLabel newCategoryLabel = new JLabel(toPlace, SwingConstants.CENTER); //User can see the update in categories list
+            JLabel newCategoryLabel = new JLabel(toPlace, SwingConstants.CENTER); //User can visually see the update in categories list
             newCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 18));
             categoriesLabels.add(newCategory.weight - 1, newCategoryLabel);
-          } else if(timedCategoryButton.isSelected()) {
+          } else if(timedCategoryButton.isSelected()) { // else if the user created category that does have a deadline
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             Date deadLine = null;
             try {
-              deadLine = (Date) dateFormat.parse((String) categoryDeadline.getText());
+              deadLine = (Date) dateFormat.parse((String) categoryDeadline.getText()); //the deadline user entered is converte from String type to Date type variable
             } catch (ParseException parseException) {
               parseException.printStackTrace();
             }
 
-            newCategory = new TimedCategory(categoryName.getText(), Integer.parseInt(categoryRank.getText()), Double.parseDouble(categoryExistingAmount.getText()), Double.parseDouble(categoryAmountNeeded.getText()), deadLine);
+            newCategory = new TimedCategory(categoryName.getText(), Integer.parseInt(categoryRank.getText()), Double.parseDouble(categoryExistingAmount.getText()), Double.parseDouble(categoryAmountNeeded.getText()), deadLine); // new Category is initialized as TimedCategory
 
             String categoryInfo = " " + ((Integer) newCategory.weight) + ") " + newCategory.title.toUpperCase() + "  $" + newCategory.existingAmount + "/$" + newCategory.neededAmount + "  Deadline: " + categoryDeadline.getText();
             String info1 = categoryInfo.substring(0, categoryInfo.indexOf("  Deadline: "));
@@ -150,27 +150,26 @@ public class HomePage {
             categoriesLabels.add(newCategory.weight - 1, newCategoryLabel);
           }
 
-          categories.add(newCategory.weight - 1, newCategory);
+          categories.add(newCategory.weight - 1, newCategory); // new category is added to the categories (A LinkedList)
 
           addCategoriesInScrollPane();
 
           if(totalAmountLeft > 0.0) {
-            totalAmountLeft = updateCategoryList(totalAmountLeft);
+            totalAmountLeft = updateCategoryList(totalAmountLeft); //if totalAmountLeft is greater than 0, it will used in the categories list
           }
 
           totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
 
-          updateCategoryRank(); // updates the rank
+          updateCategoryRank(); // updates the rank of each category
+          updateWithdrawCategoryDropDownMenu(); //updates the drop down menu that's in the withdraw section
 
           categoriesPanel.revalidate();
           categoriesPanel.repaint();
 
-          updateWithdrawCategoryDropDownMenu();
-
           //DATE
           DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
           Date date = new Date();
-          recentTransStack.push(new Ticket("New Category", 0.0 ,  dateFormat.format(date)));
+          recentTransStack.push(new Ticket("New Category", 0.0 ,  dateFormat.format(date))); //new category is pushed in the recent actions page
         }
       }
     });
@@ -543,10 +542,6 @@ public class HomePage {
     }
 
     updateCategoryRank();
-
-    if(categories.size() == 0) {
-      cancelACategoryButton.setEnabled(false);
-    }
 
     categoriesPanel.revalidate();
     categoriesPanel.repaint();
