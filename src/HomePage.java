@@ -462,8 +462,8 @@ public class HomePage {
           totalAmount -= amountLeftToPay;
           categoryStack.push(category); //adds the category to the stack
           categories.remove(i);
-//          categoriesPanel.remove(categoriesLabels.get(i)); //removes the category from the categories list (ScrollPane)
-//          categoriesLabels.remove(i);
+          categoriesPanel.remove(categoriesLabels.get(i)); //removes the category from the categories list (ScrollPane)
+          categoriesLabels.remove(i);
         }
       } else {
         break;
