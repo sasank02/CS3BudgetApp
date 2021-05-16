@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.util.Date;
 
 public class Ticket {
@@ -52,4 +53,22 @@ public class Ticket {
     return 333;
   }
 
+
+  public String toString(){
+    switch(expenseType){
+      case "Income":
+        return "$" + (expenseAmount) + " - Income Added (" + expenseDate +")";
+      case "Withdraw":
+       String[] spl = expenseDate.split("///");
+       return "$" + (expenseAmount) +" - Withdrawal (from '" + spl[1]  +"')";
+      case "Category":
+        String[] spsl = expenseDate.split("///");
+        return spsl[1] +" - Category Added (" + spsl[0] +")";
+      case "Remove Category":
+        return "Category Canceled (" + expenseDate + ")";
+
+      default:
+        return "";
+    }
+  }
 }

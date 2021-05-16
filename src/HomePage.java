@@ -3,15 +3,19 @@ import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.MatteBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.awt.Color;
 
 public class HomePage {
 
@@ -20,13 +24,19 @@ public class HomePage {
   JButton withdrawButton;
   JButton addCategoryButton;
   JButton cancelACategoryButton;
+  JButton addFromTicketButton;
+  JButton outputFileButton;
+
   JTextField incomeAmountField;
   JTextField otherSalaryField;
   JTextField withdrawAmountField;
   JButton askEditButton;
+  JTextField sourceField;
 
   LinkedList<Category> categories = new LinkedList<Category>();  //linked list data structure is used instead of arraylist
   ArrayList<JLabel> categoriesLabels = new ArrayList<JLabel>();
+
+
   JComboBox<String> categoriesComboBox = new JComboBox<String>(); // this is the drop down for withdrawing a category
 
   Double totalAmountLeft = 0.0;
@@ -74,7 +84,7 @@ public class HomePage {
 
 
     panel.add(recentTransactionsPane);
-    recentTransactionsPane.setBounds(625, 200, 240, 400);
+    recentTransactionsPane.setBounds(605, 200, 260, 400);
     recentTransactionsPane.setViewportView(recentTransactionsPanel);
     recentTransactionsPane.validate();
     recentTransactionsPane.getVerticalScrollBar().setUnitIncrement(10);
@@ -86,6 +96,62 @@ public class HomePage {
 
 
   public void setListeners(){
+
+    //TODO
+//    addFromTicketButton.addActionListener(new ActionListener() {
+//      @Override
+//      public void actionPerformed(ActionEvent e) {
+//        String path = (String) sourceField.getText();
+//        System.out.println(path);
+//        try {
+//          Scanner sc = new Scanner(new File(path));
+//          String fileType = sc.nextLine();
+//
+//          ArrayList<String> values = new ArrayList<String>();
+//          while(sc.hasNextLine()){
+//            values.add(sc.nextLine());
+//          }
+//
+//          switch(fileType.toLowerCase()){
+//            case "income":
+//              int salary = (int) Integer.parseInt(values.get(0));
+//              int other = (int) Integer.parseInt(values.get(1));
+//
+//
+//              break;
+//
+//
+//            case "withdraw":
+//              int amount = (int) Integer.parseInt(values.get(0));
+//              String category = (values.get(1));
+//
+//
+//              break;
+//
+//
+//            case "category":
+//              String cName = (values.get(0));
+//              int cRank = (int) Integer.parseInt(values.get(1));
+//              double eExisting = (double) Double.parseDouble(values.get(2));
+//              double eNeeded = (double) Double.parseDouble(values.get(3));
+//              String eType = values.get(4);
+//              String deadline = values.get(5);
+//
+//
+//              break;
+//
+//
+//            default:
+//              String val = null;
+//          }
+//
+//        } catch (FileNotFoundException fileNotFoundException) {
+//          fileNotFoundException.printStackTrace();
+//        }
+//
+//      }
+//    });
+
     addCategoryButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -118,7 +184,7 @@ public class HomePage {
           }
         });
 
-        Object[] fields = {"Category Name:", categoryName , "Category Rank:", categoryRank, "Existing Amount:" , categoryExistingAmount, "Amount Needed:", categoryAmountNeeded, "Category Type:", regularyCategoryButton, timedCategoryButton, "Category Deadline (yyyy/MM/dd HH:mm:ss):", categoryDeadline};
+        Object[] fields = {"Category Name:", categoryName , "Category Rank:", categoryRank, "Existing Amount:" , categoryExistingAmount, "Amount Needed:", categoryAmountNeeded, "Category Type:", regularyCategoryButton, timedCategoryButton, "Category Deadline (yyyy/MM/dd):", categoryDeadline};
         int input = JOptionPane.showConfirmDialog(null, fields, "New Category", JOptionPane.OK_CANCEL_OPTION);
 
         if(input == 0) { // if the user clicks ok to add a new category
@@ -127,12 +193,28 @@ public class HomePage {
           if(regularyCategoryButton.isSelected()) { // if the user created category that doesn't have a deadline
             newCategory = new Category(categoryName.getText(), Integer.parseInt(categoryRank.getText()), Double.parseDouble(categoryExistingAmount.getText()), Double.parseDouble(categoryAmountNeeded.getText()));
             String toPlace = ((Integer) newCategory.weight) + ") " + newCategory.title.toUpperCase() + "  $" + newCategory.existingAmount + "/$" + newCategory.neededAmount;
-
+           //TODO Recent
             JLabel newCategoryLabel = new JLabel(toPlace, SwingConstants.CENTER); //User can visually see the update in categories list
             newCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 18));
             categoriesLabels.add(newCategory.weight - 1, newCategoryLabel);
-          } else if(timedCategoryButton.isSelected()) { // else if the user created category that does have a deadline
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
+
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+            Date date = new Date();
+
+            JLabel newRecentCategoryLabel = new JLabel("<html><b>" + newCategory.title +"</b> - Category Added (" + dateFormat.format(date) +")</html>");
+            newRecentCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 13));
+            recentTransLabels.add(0, newRecentCategoryLabel);
+            String spl = categoryDeadline.getText() + "///" + newCategory.title;
+            recentTransStack.push(new Ticket("Category", 0.0, spl));
+
+
+
+
+          }
+
+          else if(timedCategoryButton.isSelected()) { // else if the user created category that does have a deadline
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
             Date deadLine = null;
             try {
               deadLine = (Date) dateFormat.parse((String) categoryDeadline.getText()); //the deadline user entered is converte from String type to Date type variable
@@ -141,16 +223,27 @@ public class HomePage {
             }
 
             newCategory = new TimedCategory(categoryName.getText(), Integer.parseInt(categoryRank.getText()), Double.parseDouble(categoryExistingAmount.getText()), Double.parseDouble(categoryAmountNeeded.getText()), deadLine); // new Category is initialized as TimedCategory
-
             String categoryInfo = " " + ((Integer) newCategory.weight) + ") " + newCategory.title.toUpperCase() + "  $" + newCategory.existingAmount + "/$" + newCategory.neededAmount + "  Deadline: " + categoryDeadline.getText();
             String info1 = categoryInfo.substring(0, categoryInfo.indexOf("  Deadline: "));
             String info2 = categoryInfo.substring(categoryInfo.indexOf("  Deadline: "));
+            //TODO Recent
+
+
+
+            JLabel newRecentCategoryLabel = new JLabel("<html><b>" + newCategory.title +"</b> - Timed Category Added (" + dateFormat.format(new Date()) +")</html>");
+            newRecentCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 13));
+            recentTransLabels.add(0, newRecentCategoryLabel);
+            recentTransStack.push(new Ticket("Timed Category", 0.0, dateFormat.format(new Date()) ));
+
+
             JLabel newCategoryLabel = new JLabel("<html>" + info1 + "<br/>" + info2 + "</html>");
             newCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 18));
             categoriesLabels.add(newCategory.weight - 1, newCategoryLabel);
+
           }
 
           categories.add(newCategory.weight - 1, newCategory); // new category is added to the categories (A LinkedList)
+
 
           addCategoriesInScrollPane();
 
@@ -163,13 +256,20 @@ public class HomePage {
           updateCategoryRank(); // updates the rank of each category
           updateWithdrawCategoryDropDownMenu(); //updates the drop down menu that's in the withdraw section
 
+          //TODO Recent
+          addRecentsInScrollPane();
+          recentTransactionsPanel.revalidate();
+          recentTransactionsPanel.repaint();
+
+
           categoriesPanel.revalidate();
           categoriesPanel.repaint();
 
+
           //DATE
-          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
           Date date = new Date();
-          recentTransStack.push(new Ticket("New Category", 0.0 ,  dateFormat.format(date))); //new category is pushed in the recent actions page
+          //recentTransStack.push(new Ticket("New Category", 0.0 ,  dateFormat.format(date))); //new category is pushed in the recent actions page
         }
       }
     });
@@ -189,9 +289,23 @@ public class HomePage {
           categoriesLabels.remove(categoriesList.getSelectedIndex());
           categoriesComboBox.removeItemAt(categoriesList.getSelectedIndex());
           addCategoriesInScrollPane();
+          addRecentsInScrollPane();
           updateCategoryRank();
+
+
+          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+          JLabel newRecentCategoryLabel = new JLabel("<html><b>" + "</b>Category Canceled (" + dateFormat.format(new Date()) +")</html>");
+          newRecentCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 13));
+          newRecentCategoryLabel.setForeground(Color.RED);
+          recentTransLabels.add(0, newRecentCategoryLabel);
+          recentTransStack.push(new Ticket("Remove Category", 0.0,  dateFormat.format(new Date())));
+          addRecentsInScrollPane();
+          recentTransactionsPanel.revalidate();
+          recentTransactionsPanel.repaint();
+
           categoriesPanel.revalidate();
           categoriesPanel.repaint();
+
         }
       }
     });
@@ -233,10 +347,16 @@ public class HomePage {
           }
 
           //DATE
-          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
           Date date = new Date();
+          JLabel newRecentCategoryLabel = new JLabel("<html><b>$" + (amount+otherSalary) +"</b> - Income Added (" + dateFormat.format(date) +")</html>");
+          newRecentCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 13));
+          recentTransLabels.add(0, newRecentCategoryLabel);
+          recentTransStack.push(new Ticket("Income", amount+otherSalary, dateFormat.format(date) ));
+          addRecentsInScrollPane();
+          recentTransactionsPanel.revalidate();
+          recentTransactionsPanel.repaint();
 
-          recentTransStack.push(new Ticket("Income", amount+otherSalary ,  dateFormat.format(date)));
         }
       }
     });
@@ -265,11 +385,18 @@ public class HomePage {
 
 
           //DATE
-          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
           Date date = new Date();
 
           recentTransStack.push(new Ticket("Withdrawal", doubleTotalAmount ,  dateFormat.format(date)));
 
+          JLabel newRecentCategoryLabel = new JLabel("<html><b>$" + (doubleTotalAmount) +"</b> - Withdrawal (from '" + categories.get(categoryIndex).title  +"')</html>");
+          newRecentCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 13));
+          recentTransLabels.add(0, newRecentCategoryLabel);
+          recentTransStack.push(new Ticket("Withdraw", doubleTotalAmount, dateFormat.format(date)+"///"+ categories.get(categoryIndex).title));
+          addRecentsInScrollPane();
+          recentTransactionsPanel.revalidate();
+          recentTransactionsPanel.repaint();
 
           categoriesLabels.get(categoryIndex).setText(" " + ((Integer) categories.get(categoryIndex).weight) + ") " + categories.get(categoryIndex).title.toUpperCase() + "  $" + categories.get(categoryIndex).existingAmount + "/$"  + categories.get(categoryIndex).neededAmount);
           categoriesPanel.revalidate();
@@ -296,6 +423,59 @@ public class HomePage {
       }
     });
 
+    outputFileButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+
+        int dialogButton = JOptionPane.YES_NO_OPTION;
+        int dialogResult = JOptionPane.showConfirmDialog(null, "Do you want to include the entire recent actions data?", "Recent Actions", dialogButton);
+        if(dialogResult == 0) {
+          try {
+            generateSummarySheet(true);
+          } catch (FileNotFoundException fileNotFoundException) {
+            fileNotFoundException.printStackTrace();
+          }
+        } else {
+          try {
+            generateSummarySheet(false);
+          } catch (FileNotFoundException fileNotFoundException) {
+            fileNotFoundException.printStackTrace();
+          }
+        }
+
+      }
+    });
+  }
+
+  public void generateSummarySheet(boolean recentIncluded) throws FileNotFoundException {
+    //Read Categories
+    Date currentDate = new Date();
+    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+    String date = "Budget Summary Report"+dateFormat.format(new Date());
+    if(recentIncluded){
+      try {
+        FileWriter myWriter = new FileWriter("readCategory.txt");
+        new FileWriter("readCategory.txt", false).close();
+
+        myWriter.write("Existing Category Status \n\n");
+        for(Category c : categories){
+          myWriter.write(c.toString() + "\n\n");
+        }
+        myWriter.write("Recent Transactions \n\n");
+
+        for(Ticket c : recentTransStack){
+          myWriter.write(c.toString() + "\n");
+        }
+        myWriter.close();
+
+      } catch (IOException e) {
+        System.out.println("An error occurred.");
+        e.printStackTrace();
+      }
+    }
+
+
+    //Recent Actions if needed
   }
 
   public int findCategory(String src){
@@ -310,7 +490,7 @@ public class HomePage {
 
   public void setGraphics() {
     JFrame frame = new JFrame("Budget");
-    frame.setSize(900, 700);
+    frame.setSize(900, 750);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setLocationRelativeTo(null);
 
@@ -342,7 +522,7 @@ public class HomePage {
 
     JLabel categoriesLabel = new JLabel("Categories");
     categoriesLabel.setForeground(Color.white);
-    categoriesLabel.setBounds(60, 100, 400, 50);
+    categoriesLabel.setBounds(100, 100, 400, 50);
     categoriesLabel.setFont(new Font("Heveltica", Font.BOLD, 18));
 
     JLabel recentTransactionsLabel = new JLabel("Recent Actions");
@@ -446,22 +626,54 @@ public class HomePage {
     });
 
 
-    addCategoryButton = new JButton("Add Category");
-    addCategoryButton.setBounds(10, 150, 150, 30);
+    addCategoryButton = new JButton("Add");
+    addCategoryButton.setBounds(25, 150, 120, 30);
     addCategoryButton.setBorder(new RoundedBorder(30)); //10 is the radius
-    addCategoryButton.setForeground(Color.white);
     panel.add(addCategoryButton);
     customizeButton(addCategoryButton);
 
-    cancelACategoryButton = new JButton("Cancel Category");
-    cancelACategoryButton.setBounds(165, 150, 165, 30);
+    cancelACategoryButton = new JButton("Cancel");
+    cancelACategoryButton.setBounds(150, 150, 120, 30);
     cancelACategoryButton.setBorder(new RoundedBorder(30)); //10 is the radius
-    cancelACategoryButton.setForeground(Color.white);
     panel.add(cancelACategoryButton);
     customizeButton(cancelACategoryButton);
 
-//comment
-    //comment
+
+
+    outputFileButton = new JButton(("Generate Report"));
+    outputFileButton.setBounds(330, 650, 200,30);
+    outputFileButton.setBorder(new RoundedBorder(30));
+    panel.add(outputFileButton);
+    customizeButton(outputFileButton);
+
+//    addFromTicketButton = new JButton(("Extract"));
+//    addFromTicketButton.setBounds(365, 680, 120,30);
+//    addFromTicketButton.setBorder(new RoundedBorder(30));
+//    panel.add(addFromTicketButton);
+//    customizeButton(addFromTicketButton);
+//
+//    JLabel readFromTicketLabel = new JLabel("Read From Local .txt File", SwingConstants.CENTER);
+//    readFromTicketLabel.setForeground(Color.white);
+//    readFromTicketLabel.setBounds(310, 610,220,30);
+//    readFromTicketLabel.setFont(new Font("Heveltica", Font.BOLD, 17));
+//    panel.add(readFromTicketLabel);
+//
+//
+//    JLabel sourceLabel = new JLabel("Path: ", SwingConstants.CENTER);
+//    sourceLabel.setForeground(Color.white);
+//    sourceLabel.setBounds(290, 640, 80, 30);
+//    sourceLabel.setFont(new Font("Heveltica", Font.PLAIN, 15));
+//    panel.add(sourceLabel);
+//
+//
+//    sourceField = new JTextField();
+//    sourceField.setBounds(360, 640, 150, 20);
+//    sourceField.setBorder(null);
+//    sourceField.setBorder( new MatteBorder(0, 0, 2, 0, Color.white));
+//    sourceField.setBackground(new Color(0, 0, 0, 0));
+//    panel.add(sourceField);
+
+//FileSystemView.getFileSystemView().getHomeDirectory()
 
     panel.add(withdrawAmountLabel);
     panel.add(withdrawAmountField);
@@ -469,8 +681,6 @@ public class HomePage {
     panel.add(withdrawButton);
     panel.add(recentTransactionsLabel);
     panel.add(recentTransactionsSubtitleLabel);
-
-
     panel.add(addIncomeButton);
     panel.add(incomeAmountLabel);
     panel.add(incomeAmountField);
@@ -505,7 +715,7 @@ public class HomePage {
       categories.get(i).weight = i + 1;
       Category category = categories.get(i);
       if(categories.get(i) instanceof TimedCategory) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         String categoryInfo = " " + ((Integer) category.weight) + ") " + category.title.toUpperCase() + "  $" + category.existingAmount + "/$" + category.neededAmount + "  Deadline: " + dateFormat.format(((TimedCategory) categories.get(i)).deadline);
         String info1 = categoryInfo.substring(0, categoryInfo.indexOf("  Deadline: "));
         String info2 = categoryInfo.substring(categoryInfo.indexOf("  Deadline: "));
@@ -529,9 +739,25 @@ public class HomePage {
           } else if (totalAmount >= amountLeftToPay) {
             category.existingAmount += amountLeftToPay;
             totalAmount -= amountLeftToPay;
+
+
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+            JLabel newRecentCategoryLabel = new JLabel("<html><b>" + categories.get(i).title +"</b> - Category Completed (" + dateFormat.format(new Date()) +")</html>");
+            newRecentCategoryLabel.setFont(new Font("Times New Roman", Font.BOLD, 15));
+            newRecentCategoryLabel.setForeground(new Color(7, 88, 11));
+            recentTransLabels.add(0, newRecentCategoryLabel);
+            recentTransStack.push(new Ticket("Done Category", 0.0,  dateFormat.format(new Date())));
+            addRecentsInScrollPane();
+            recentTransactionsPanel.revalidate();
+            recentTransactionsPanel.repaint();
+
+
             categories.remove(i);
             categoriesPanel.remove(categoriesLabels.get(i)); //the user can visually see the category being removed
             categoriesLabels.remove(i);
+
+
+
           }
         } else {
           i++;
@@ -563,6 +789,15 @@ public class HomePage {
     for(int i = 0; i < categoriesLabels.size(); i++) {
       categoriesPanel.add(categoriesLabels.get(i));
       categoriesPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+    }
+  }
+
+  public void addRecentsInScrollPane() {
+    recentTransactionsPanel.removeAll();
+
+    for(int i = 0; i < recentTransLabels.size(); i++) {
+      recentTransactionsPanel.add(recentTransLabels.get(i));
+      recentTransactionsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
     }
   }
 
@@ -598,6 +833,7 @@ public class HomePage {
       g.drawRoundRect(x, y, width-1, height-1, radius, radius);
     }
   }
+
 
 }
 

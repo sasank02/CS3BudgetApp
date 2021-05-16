@@ -26,6 +26,15 @@ public class Category implements Comparable<Category> {
     updateFilledPercent();
   }
 
+  public String toString(){
+    filledPercent = (Double) 100.0 * existingAmount/neededAmount;
+   return ("Rank: " + weight + "\n"
+     + "Title: " + title + "\n"
+     + "Existing Amount: " + existingAmount + "\n"
+     + "Required Amount: " + neededAmount + "\n"
+     + filledPercent + "% Filled");
+  }
+
   @Override
   public int compareTo(Category o) {
     return this.weight.compareTo(o.weight);

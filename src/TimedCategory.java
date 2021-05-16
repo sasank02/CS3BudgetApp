@@ -16,4 +16,15 @@ public class TimedCategory extends Category {
             deadlinePassed = true;
         }
     }
+
+
+  public String toString(){
+    filledPercent = (Double) 100.0 * existingAmount/neededAmount;
+    return ("Rank: " + weight + "\n"
+      + "Title: " + title + "\n"
+      + "Existing Amount: " + existingAmount + "\n"
+      + "Required Amount: " + neededAmount + "\n"
+      + filledPercent + "% Filled" +"\n"
+    + "Deadline: " + deadline.toString());
+  }
 }
