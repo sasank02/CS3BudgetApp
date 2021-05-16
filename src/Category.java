@@ -4,7 +4,6 @@ public class Category implements Comparable<Category> {
   Double existingAmount;
   Double neededAmount;
   Double filledPercent;
-  int specialImportance;
   //comment
   //comment
   public Category(String cTitle, Integer cWeight, Double cExistingAmount, Double cNeededAmount) {
@@ -13,9 +12,6 @@ public class Category implements Comparable<Category> {
     existingAmount = cExistingAmount;
     neededAmount = cNeededAmount;
     filledPercent = (Double) 100.0 * existingAmount/neededAmount;
-  }
-
-  public Category() {
   }
 
   public void updateFilledPercent(){
@@ -28,9 +24,6 @@ public class Category implements Comparable<Category> {
   public void changeNeededAmount(Double newValue){
     neededAmount = newValue;
     updateFilledPercent();
-  }
-  public void setSpecialImportance(int newValue){
-    specialImportance = newValue;
   }
 
   @Override
