@@ -62,7 +62,6 @@ public class HomePage {
 
     categoriesPanel.setLayout(new BoxLayout(categoriesPanel, BoxLayout.PAGE_AXIS));
     categoriesScrollPane.add(categoriesPanel);
-    categoriesPanel.setPreferredSize(new Dimension(400, 400));
     categoriesPanel.revalidate();
     categoriesPanel.repaint();
 
@@ -71,23 +70,26 @@ public class HomePage {
     categoriesScrollPane.setViewportView(categoriesPanel);
     categoriesScrollPane.validate();
     categoriesScrollPane.getVerticalScrollBar().setUnitIncrement(10);
+    categoriesScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    categoriesScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
     panel.add(categoriesComboBox);
     categoriesComboBox.setBounds(370, 505, 120,20);
     categoriesComboBox.setBorder(null);
+    categoriesComboBox.addItem("Amount Left");
 
     recentTransactionsPanel.setLayout(new BoxLayout(recentTransactionsPanel, BoxLayout.Y_AXIS));
     recentTransactionsPane.add(recentTransactionsPanel);
     recentTransactionsPanel.revalidate();
     recentTransactionsPanel.repaint();
-    recentTransactionsPanel.setPreferredSize(new Dimension(240, 400));
-
 
     panel.add(recentTransactionsPane);
     recentTransactionsPane.setBounds(605, 200, 260, 400);
     recentTransactionsPane.setViewportView(recentTransactionsPanel);
     recentTransactionsPane.validate();
     recentTransactionsPane.getVerticalScrollBar().setUnitIncrement(10);
+    recentTransactionsPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    recentTransactionsPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
     panel.add(totalAmountLeftCheckBox);
     totalAmountLeftCheckBox.setBounds(475, 455, 125, 30);
@@ -374,35 +376,40 @@ public class HomePage {
 
         //Remove MONEY From CATEGORY SPREAD EVENLY
 
-        int categoryIndex = findCategory(sourceString);
-
-        if(categoryIndex >= 0) {
-          categories.get(categoryIndex).existingAmount -= doubleTotalAmount;
-          if(totalAmountLeftCheckBox.isSelected()) {
-            totalAmountLeft += doubleTotalAmount;
-            totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
-          }
-
-
-          //DATE
-          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-          Date date = new Date();
-
-          recentTransStack.push(new Ticket("Withdrawal", doubleTotalAmount ,  dateFormat.format(date)));
-
-          JLabel newRecentCategoryLabel = new JLabel("<html><b>$" + (doubleTotalAmount) +"</b> - Withdrawal (from '" + categories.get(categoryIndex).title  +"')</html>");
-          newRecentCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 13));
-          recentTransLabels.add(0, newRecentCategoryLabel);
-          recentTransStack.push(new Ticket("Withdraw", doubleTotalAmount, dateFormat.format(date)+"///"+ categories.get(categoryIndex).title));
-          addRecentsInScrollPane();
-          recentTransactionsPanel.revalidate();
-          recentTransactionsPanel.repaint();
-
-          categoriesLabels.get(categoryIndex).setText(" " + ((Integer) categories.get(categoryIndex).weight) + ") " + categories.get(categoryIndex).title.toUpperCase() + "  $" + categories.get(categoryIndex).existingAmount + "/$"  + categories.get(categoryIndex).neededAmount);
-          categoriesPanel.revalidate();
-          categoriesPanel.repaint();
+        if(categoriesComboBox.getSelectedIndex() == categoriesComboBox.getItemCount() - 1) {
+          totalAmountLeft -= doubleTotalAmount;
+          totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
         } else {
-          JOptionPane.showMessageDialog(null, "This category doesn't exist", "Alert", JOptionPane.WARNING_MESSAGE);
+          int categoryIndex = findCategory(sourceString);
+
+          if (categoryIndex >= 0) {
+            categories.get(categoryIndex).existingAmount -= doubleTotalAmount;
+            if (totalAmountLeftCheckBox.isSelected()) {
+              totalAmountLeft += doubleTotalAmount;
+              totalAmountLeftLabel.setText("Amount Left: $" + totalAmountLeft);
+            }
+
+
+            //DATE
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+            Date date = new Date();
+
+            recentTransStack.push(new Ticket("Withdrawal", doubleTotalAmount, dateFormat.format(date)));
+
+            JLabel newRecentCategoryLabel = new JLabel("<html><b>$" + (doubleTotalAmount) + "</b> - Withdrawal (from '" + categories.get(categoryIndex).title + "')</html>");
+            newRecentCategoryLabel.setFont(new Font("Times New Roman", Font.PLAIN, 13));
+            recentTransLabels.add(0, newRecentCategoryLabel);
+            recentTransStack.push(new Ticket("Withdraw", doubleTotalAmount, dateFormat.format(date) + "///" + categories.get(categoryIndex).title));
+            addRecentsInScrollPane();
+            recentTransactionsPanel.revalidate();
+            recentTransactionsPanel.repaint();
+
+            categoriesLabels.get(categoryIndex).setText(" " + ((Integer) categories.get(categoryIndex).weight) + ") " + categories.get(categoryIndex).title.toUpperCase() + "  $" + categories.get(categoryIndex).existingAmount + "/$" + categories.get(categoryIndex).neededAmount);
+            categoriesPanel.revalidate();
+            categoriesPanel.repaint();
+          } else {
+            JOptionPane.showMessageDialog(null, "This category doesn't exist", "Alert", JOptionPane.WARNING_MESSAGE);
+          }
         }
       }
     });
@@ -781,6 +788,8 @@ public class HomePage {
     for(int i = 0; i < categories.size(); i++) {
       categoriesComboBox.addItem(categories.get(i).title);
     }
+
+    categoriesComboBox.addItem("Amount Left");
   }
 
   public void addCategoriesInScrollPane() {
