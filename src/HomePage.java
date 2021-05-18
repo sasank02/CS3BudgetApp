@@ -760,20 +760,12 @@ public class HomePage {
 
 
             categories.remove(i);
-            categoriesPanel.remove(categoriesLabels.get(i)); //the user can visually see the category being removed
+            categoriesPanel.remove(categoriesLabels.get(i)); //the user can visually see the category being removed from JPanel
             categoriesLabels.remove(i);
-
-
-
           }
-        } else {
-          i++;
-        }
-      } else {
-        break;
-      }
+        } else { i++; }
+      } else { break; }
     }
-
     updateCategoryRank();
 
     categoriesPanel.revalidate();

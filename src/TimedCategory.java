@@ -18,7 +18,7 @@ public class TimedCategory extends Category {
     }
 
 
-  public String toString(){
+  public String toString(){ //returns string
     filledPercent = (Double) 100.0 * existingAmount/neededAmount;
     return ("Rank: " + weight + "\n"
       + "Title: " + title + "\n"

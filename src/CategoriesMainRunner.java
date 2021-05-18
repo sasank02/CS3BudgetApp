@@ -1,6 +1,6 @@
 
 public class CategoriesMainRunner {
   public static void main(String[] args) {
-    new HomePage();
+    new HomePage(); //creates new page
   }
 }

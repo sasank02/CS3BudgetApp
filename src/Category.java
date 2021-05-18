@@ -5,7 +5,7 @@ public class Category implements Comparable<Category> {
   Double neededAmount;
   Double filledPercent;
   //comment
-  //comment
+  //comment comment
   public Category(String cTitle, Integer cWeight, Double cExistingAmount, Double cNeededAmount) {
     title = cTitle;
     weight = cWeight;

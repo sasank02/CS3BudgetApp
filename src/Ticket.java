@@ -1,7 +1,7 @@
 import javax.swing.*;
 import java.util.Date;
 
-public class Ticket {
+public class Ticket { // class
   private Double expenseAmount;
   private String expenseType;
   private String expenseDate;
